@@ -109,6 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+venv_drlnd_continuous_control
 
 # Spyder project settings
 .spyderproject
@@ -127,3 +128,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Reinforcement Learning environments
+bin/environments/
