@@ -1,0 +1,32 @@
+{
+    "neurons" : {
+        "sensory" : {
+            "neurons" : [
+                {
+                    "agent" : {
+                        "type" : "DDPG",
+                        "additional_dim" : 33
+                    }
+                }
+            ]
+        },
+        "intern" : {
+            "quantity" : 0
+        },
+        "motor" : {
+            "neurons" : [
+                {
+                    "agent" : {
+                        "type" : "DDPG",
+                        "additional_dim" : 4
+                    }
+                }
+            ]
+        }
+    },
+    "attention_field":
+        {
+            "key_dim" : 2,
+            "value_dim" : 3
+        }
+}

@@ -86,7 +86,7 @@ class DdpgAgent(object):
             #print(action)
             #print(noise_factor)
             #print(self.noise.sample().reshape((-1, 4)))
-            action += noise_factor * self.noise.sample().reshape((-1, 4))
+            action += noise_factor * self.noise.sample().reshape((-1, self.action_size))
         return np.clip(action, -1, 1)
 
     def reset(self):

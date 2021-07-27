@@ -3,27 +3,30 @@ import numpy as np
 
 class Neuron(object):
 
-    def __init__(self, neuron_type, non_intern_signal_size = None):
+    def __init__(self, neuron_type, k_dim, v_dim, environment_signal_size = None):
 
         self.state, self.next_state, self.action, self.reward = None, None, None, None
         self.neuron_type = neuron_type
-        self.non_intern_signal_size = non_intern_signal_size
+        self.k_dim, self. v_dim, self.environment_signal_size = k_dim, v_dim, environment_signal_size
 
         self.buildRlAgent()
 
     def buildRlAgent(self):
-
-        self.state_size, self.action_size = 80, 80
-
         if self.neuron_type == "sensory":
-            self.state_size = self.non_intern_signal_size
+            self.state_size = self.k_dim + self.environment_signal_size
+            self.action_size = self.k_dim + self.v_dim
+            
+        elif self.neuron_type == "intern":
+            self.state_size = self.k_dim*2 + self.v_dim
+            self.action_size = self.k_dim*2 + self.v_dim
+            self.state = np.random.rand(1,self.state_size)
 
         elif self.neuron_type == "motor":
-            self.action_size = self.non_intern_signal_size
+            self.state_size = self.k_dim + self.v_dim
+            self.action_size = self.k_dim + self.environment_signal_size
+            self.state = np.random.rand(1,self.state_size)
 
-        elif self.neuron_type == "temporal_mix":
-            self.state_size = 33
-            self.action_size = 4
+        print("Neuron: Building a {} neuron with {} state size and {} action size".format(self.neuron_type, self.state_size, self.action_size))
 
         self.rl_agent = DdpgAgent(self.state_size, self.action_size, random_seed = 2)
 
@@ -48,4 +51,3 @@ class Neuron(object):
         self.rl_agent.step(self.state, self.action, self.reward, self.next_state, [done])
         self.state = self.next_state
         self.next_state = None
-
