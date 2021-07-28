@@ -19,7 +19,6 @@ class AttentionField(object):
         self.set_attention = F.softmax(attn_logits, dim=-1)
         self.avg_values = torch.matmul(self.set_attention, v)
         
-
     def addEntries(self, queries, keys, values):
         if type(queries) is np.ndarray:
             if queries.shape[1] == self.k_dim:
@@ -39,9 +38,10 @@ class AttentionField(object):
         self.values = torch.tensor(np.array([]))
 
     def runStep(self):
-        print("Attention field: running step with {} queries, {} keys and {} values".format(self.queries.shape, self.keys.shape, self.values.shape))
+        # print("Attention field: running step with {} queries, {} keys and {} values".format(self.queries.shape, self.keys.shape, self.values.shape))
         self.scaledDotProduct(self.queries, self.keys, self.values)
-        return self.avg_values, self.set_attention
+        self.resetEntries()
+        return self.avg_values.numpy(), self.set_attention.numpy()
 
     def test(self):
         q = torch.randn(3, 2)

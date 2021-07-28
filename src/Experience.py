@@ -20,7 +20,7 @@ class Experience(object):
                 self.meta_environment.runSteps()
                 self.allocateEnvironementOutput()
                 self.meta_environment.closeEnvironments()
-                self.brain.backprop()
+
         except AssertionError as error:
             print(error)
             self.meta_environment.closeEnvironments()

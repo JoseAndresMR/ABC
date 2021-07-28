@@ -29,7 +29,6 @@ class ABCUnityEpisodicEnvironment(Environment):
         env_info = self.env.reset(train_mode=True)[self.brain_name]
         self.states = env_info.vector_observations  # get the current states
         self.e_scores = np.zeros(1)  # the scores of an episode for each of the 20 reachers
-        print("states shape", self.states.shape)
         return self.states
 
     def step(self):

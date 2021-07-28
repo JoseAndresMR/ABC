@@ -16,6 +16,7 @@ class Brain(object):
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
         self.startAttentionField()
         self.spawnNeurons()
+        self.forward_step = 0
 
     def spawnNeurons(self): ### SIMPLIFY FUNCTION
         for neuron_type, type_neuron_config in self.config["neurons"].items():
@@ -31,51 +32,63 @@ class Brain(object):
                 for neuron_config in type_neuron_config["neurons"]:
                     self.spawnOneNeuron(neuron_type, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
 
-    def spawnOneNeuron(self, neuron_type, k_min, v_min, additional_dim):
+    def spawnOneNeuron(self, neuron_type, k_min, v_min, additional_dim = None):
         empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
         neuron = deepcopy(empty_neuron)
         neuron["neuron"] = Neuron(neuron_type, k_min, v_min, additional_dim)
-        neuron["state"] = neuron["neuron"].state
         neuron["info"]["type"] = neuron_type
         self.neurons["all"].append(neuron)
         self.neurons[neuron_type].append(neuron)
 
     def forward(self):
-        for neuron in self.neurons["sensory"]:
-            neuron["action"] = neuron["neuron"].forward()
-            self.attention_field.addEntries(None, neuron["action"][:,:self.k_dim], neuron["action"][:,self.k_dim:])
-
+        # print("Brain: forward step {}".format(self.forward_step))
+        if self.forward_step > 0:
+            [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
         self.runAttentionFieldStep()
-
-        for neuron in self.neurons["intern"]:
-            neuron["action"] = neuron["neuron"].forward()
-            self.attention_field.addEntries(neuron["action"][:,:self.k_dim],
-                                            neuron["action"][:,self.k_dim:self.k_dim*2],
-                                            neuron["action"][:,self.k_dim*2:])
-
+        if self.forward_step > 0:
+            [neuron["neuron"].backprop() for neuron in self.neurons["motor"]]
+        if self.forward_step > 1:
+            [neuron["neuron"].backprop() for neuron in self.neurons["intern"]]
+        [neuron["neuron"].forward() for neuron in self.neurons["intern"]]
         for neuron in self.neurons["motor"]:
-            neuron["action"] = neuron["neuron"].forward()
-            self.attention_field.addEntries(neuron["action"][:,:self.k_dim], None, None)
+            neuron["neuron"].forward()
+            neuron["action"] = neuron["neuron"].output_value
+        self.forward_step += 1
 
     def runAttentionFieldStep(self):
+        for neuron in self.neurons["sensory"]:
+            self.attention_field.addEntries(None, neuron["neuron"].key, neuron["neuron"].output_value)
+        for neuron in self.neurons["intern"]:
+            self.attention_field.addEntries(neuron["neuron"].query,
+                                            neuron["neuron"].key,
+                                            neuron["neuron"].output_value)
+        for neuron in self.neurons["motor"]:
+            self.attention_field.addEntries(neuron["neuron"].query, None, None)
 
         values, attended = self.attention_field.runStep()
         neurons = self.neurons["intern"] + self.neurons["motor"]
         for i, value in enumerate(values):
-            if i < len(self.neurons["intern"]):
-                neurons[i]["state"] = neurons[i]["actions"][:self.k_dim*2].append(value)
-            else:
-                neurons[i-len(self.neurons["intern"])]["state"] = neurons[i-len(self.neurons["intern"])]["actions"][:self.k_dim].append(value)
-            neurons[i]["attended"] = attended
-
-    def backprop(self):
-        [neuron["neuron"].backprop() for neuron in self.neurons["motor"]]
-        [neuron["neuron"].backprop() for neuron in self.neurons["intern"]]
-        [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
+            neurons[i]["neuron"].setNextInputValue(np.array([value]))
+            neurons[i]["neuron"].attended = attended[i]
 
     def setStateAndReward(self):
-        [neuron["neuron"].setNextState(neuron["state"]) for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory"]]
+
+        [self.allocateReward(neuron["reward"], neuron["neuron"].attended) for neuron in self.neurons["motor"]]
+        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["intern"]]
         [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["motor"]]
+
+    def allocateReward(self, reward, attendeds):
+        split_rewards = np.array(attendeds)*np.array(reward)
+        neurons = self.neurons["sensory"] + self.neurons["intern"]
+        
+        for i, split_reward in enumerate(split_rewards):
+            if split_reward > 0.1:
+                neurons[i]["reward"] =+ split_reward
+                if neurons[i].neuron_type != "sensory":
+                    self.allocateReward(split_reward, neurons[i]["neuron"].attended)            
 
     def startAttentionField(self):
         af_config = self.config["attention_field"]
