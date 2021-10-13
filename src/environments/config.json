@@ -59,9 +59,9 @@
                 ],
                 "action" : [
                     {
-                        "env_input" : [1,4],
+                        "env_input" : [1,2],
                         "neuron" : 1,
-                        "neuron_output" : [1,4]
+                        "neuron_output" : [1,2]
                     }
                 ]
             }

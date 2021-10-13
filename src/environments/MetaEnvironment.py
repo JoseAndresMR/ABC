@@ -52,6 +52,6 @@ class MetaEnvironment(object):
     def closeEnvironments(self):
         envs = self.config["environments"]
         for env in envs:
-            if self.environments[env["name"]]["finished"]:
-                self.environments[env["name"]]["env"].finishEnvironment()
-                self.environments.pop(env["name"])
+            if self.environments[env["id"]]["finished"]:
+                self.environments[env["id"]]["env"].finishEnvironment()
+                self.environments.pop(env["id"])

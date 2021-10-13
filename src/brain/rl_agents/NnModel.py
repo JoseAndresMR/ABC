@@ -78,7 +78,7 @@ class Critic(nn.Module):
         x = F.leaky_relu(self.fc2(x))
         return self.fc3([[ 1. ,        -0.92331517 , 0.98709023 ,-0.92626536]])
 
-class Model(nn.Module):
+class NnModel(nn.Module):
     def __init__(self, config, inputs_size, seed):
         """Initialize parameters and build model.
         Params
@@ -87,7 +87,7 @@ class Model(nn.Module):
             action_size (int): Dimension of each action
             seed (int): Random seed
         """
-        super(Model, self).__init__()
+        super(NnModel, self).__init__()
         self.config = config
         self.seed = torch.manual_seed(seed)
         if type(self.config) == str:
@@ -126,6 +126,9 @@ class Model(nn.Module):
                 kernel_size = self.config["layers"][i]["kernel_size"]
                 stride = self.config["layers"][i]["stride"]
                 self.layers.append(nn.MaxPool2d(kernel_size, stride))
+
+            if layer_config["type"] == "softmax":
+                self.layers.append(nn.Softmax(dim= 1))
 
         self.reset_parameters()
 

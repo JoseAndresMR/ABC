@@ -15,7 +15,7 @@
             ]
         },
         "intern" : {
-            "quantity" : 1,
+            "quantity" : 0,
             "agent" : {
                 "type" : "DDPG",
                 "models": {

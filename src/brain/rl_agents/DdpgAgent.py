@@ -5,7 +5,7 @@ import copy
 from collections import namedtuple, deque
 from copy import deepcopy
 
-from brain.rl_agents.Model import Model
+from brain.rl_agents.NnModel import NnModel
 
 import torch
 import torch.nn.functional as F
@@ -48,8 +48,8 @@ class DdpgAgent(object):
         self.log_path = os.path.join(os.path.dirname(__file__),'..','..','..',"data/runs/experiments")
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Model(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
-        self.actor_target = Model(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
+        self.actor_local = NnModel(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
+        self.actor_target = NnModel(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
         fake_inputs = {"state" : torch.randn(1, state_size).to(device), "action" : torch.randn(1, action_size).to(device)}
         writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "actor_graph"))
         writer.add_graph(self.actor_local, fake_inputs)
@@ -57,8 +57,8 @@ class DdpgAgent(object):
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Model(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
-        self.critic_target = Model(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
+        self.critic_local = NnModel(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
+        self.critic_target = NnModel(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
         writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "critic_graph"))
         writer.add_graph(self.critic_local, fake_inputs)
         writer.close()

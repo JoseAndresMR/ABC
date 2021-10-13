@@ -9,13 +9,11 @@ class GymEpisodicEnvironment(Environment):
         super().__init__(id)
         self.env = gym.make(name)
         observations = self.env.reset()
-        action_size = self.env.action_space.n
         state_type = type(self.env.observation_space)
         state_size = self.env.observation_space.shape
-        (state_size)
-        self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size}
-        # self.fig = plt.figure()
-        # self.ax = self.fig.add_subplot(111)
+        action_size = self.env.action_space.n
+        action_type = type(self.env.action_space)
+        self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
 
     def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=3):
         self.n_episodes, self.max_t, self.print_every, self.success_avg = n_episodes, max_t, print_every, success_avg
@@ -30,14 +28,13 @@ class GymEpisodicEnvironment(Environment):
     def step(self):
         episode_finished = False
         if self.current_t < self.max_t:
-            env_info = self.env.step(self.actions)      # execute the selected actions and save the new information about the environment
-            rewards = env_info.rewards                    # get the rewards
-            next_states = env_info.vector_observations    # get the resulting states
-            dones = env_info.local_done                   # check whether episodes have finished
-            self.states = next_states
-            self.e_scores += rewards
+            if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
+                self.actions = np.argmax(self.actions)
+            observation, reward, done, info = self.env.step(self.actions)      # execute the selected actions and save the new information about the environment
+            self.states = np.array([observation])
+            self.e_scores += [reward]
             self.current_t += 1
-            if np.any(dones):
+            if done:
                 self.state = None
                 episode_finished = True
         else:
@@ -45,7 +42,6 @@ class GymEpisodicEnvironment(Environment):
         
         if episode_finished:
             self.states = np.array(self.env.reset())
-            e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
             self.current_episode += 1
             self.current_t = 0
 
@@ -71,9 +67,10 @@ class GymEpisodicEnvironment(Environment):
                 self.tensorboard_writer.add_scalar('scores',
                                                 self.scores_deque[-1],
                                                 self.current_episode)
+            self.e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
 
         env_finished = self.current_episode == self.n_episodes + 1
-        return (rewards, next_states, dones, env_finished)
+        return ([reward], np.array([observation]), [done], env_finished)
 
     def finishEnvironment(self):
         self.env.close()  # close the environment as it is no longer needed

@@ -50,7 +50,6 @@ class UnityEpisodicEnvironment(Environment):
         if episode_finished:
             env_info = self.env.reset(train_mode=True)[self.brain_name]
             self.states = env_info.vector_observations  # get the current states
-            e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
             self.current_episode += 1
             self.current_t = 0
 
@@ -76,6 +75,7 @@ class UnityEpisodicEnvironment(Environment):
                 self.tensorboard_writer.add_scalar('scores',
                                                 self.scores_deque[-1],
                                                 self.current_episode)
+            self.e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
 
         env_finished = self.current_episode == self.n_episodes + 1
         return (rewards, next_states, dones, env_finished)

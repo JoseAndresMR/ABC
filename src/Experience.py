@@ -42,7 +42,7 @@ class Experience(object):
                                                                                                 self.meta_environment.environments[env_conf["env"]]["state"][:, env_output[0]-1: env_output[1]])
                 for map in env_conf["signals_map"]["action"]:
                     if self.meta_environment.environments[env_conf["env"]]["reward"] != []:
-                        neuron_output = map["neuron_output"]                    
+                        neuron_output = map["neuron_output"]
                         self.brain.neurons["motor"][map["neuron"]-1]["reward"] = addMatrixToTarget(self.brain.neurons["motor"][map["neuron"]-1]["reward"],
                                                                                                     neuron_output,
                                                                                                     np.ones((first_dim, neuron_output[1]-neuron_output[0] + 1))*self.meta_environment.environments[env_conf["env"]]["reward"][0])
@@ -50,13 +50,14 @@ class Experience(object):
 
     def allocateBrainOutput(self):
         for env_conf in self.meta_environment.config["schedule"]:
-            for map in env_conf["signals_map"]["action"]:
-                if self.brain.neurons["motor"][map["neuron"]-1]["action"] != []:
-                    neuron_output = map["neuron_output"]
-                    env_input = map["env_input"]
-                    self.meta_environment.environments[env_conf["env"]]["action"] = addMatrixToTarget(self.meta_environment.environments[env_conf["env"]]["action"],
-                                                                                        env_input,
-                                                                                        self.brain.neurons["motor"][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
+            if env_conf["active"]:
+                for map in env_conf["signals_map"]["action"]:
+                    if self.brain.neurons["motor"][map["neuron"]-1]["action"] != []:
+                        neuron_output = map["neuron_output"]
+                        env_input = map["env_input"]
+                        self.meta_environment.environments[env_conf["env"]]["action"] = addMatrixToTarget(self.meta_environment.environments[env_conf["env"]]["action"],
+                                                                                            env_input,
+                                                                                            self.brain.neurons["motor"][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
         self.meta_environment.setAction()
 
 def addMatrixToTarget(target_matrix, target_dim, added_matrix):
