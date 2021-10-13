@@ -9,6 +9,8 @@ import torch
 import torch.nn.functional as F
 import torch.optim as optim
 
+from torch.utils.tensorboard import SummaryWriter
+
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 256        # minibatch size
 GAMMA = 0.99            # discount factor
@@ -40,6 +42,10 @@ class Agent(object):
 
         # Actor Network (w/ Target Network)
         self.actor_local = Actor(state_size, action_size, random_seed).to(device)
+        writer = SummaryWriter("runs/experiment")
+        x = torch.randn(1, state_size).to(device)
+        y = torch.randn(1, action_size)
+        writer.add_graph(self.actor_local, (x))
         self.actor_target = Actor(state_size, action_size, random_seed).to(device)
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
@@ -64,7 +70,7 @@ class Agent(object):
 
     def step(self, states, actions, rewards, next_states, dones):
         """Save experience in replay memory, and use random sample from buffer to learn."""
-        # Save experiences / rewards
+        # Save experiences / reward
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
             self.memory.add(state, action, reward, next_state, done)
 

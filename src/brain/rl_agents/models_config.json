@@ -1,0 +1,15 @@
+{
+    "short_linear" : {
+        "layers" : [
+            {
+                "type" : "linear",
+                "size" : 128
+            },
+            {
+                "type" : "linear",
+                "size" : 128,
+                "concat" : "action"
+            }
+        ]
+    }
+}

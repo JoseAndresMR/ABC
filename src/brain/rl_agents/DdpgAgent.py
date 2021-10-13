@@ -1,13 +1,18 @@
 import numpy as np
+import os
 import random
 import copy
 from collections import namedtuple, deque
+from copy import deepcopy
 
-from brain.rl_agents.model import Actor, Critic
+from brain.rl_agents.Model import Model
 
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+
+import tensorboard as tb
+from torch.utils.tensorboard import SummaryWriter
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 256        # minibatch size
@@ -25,7 +30,7 @@ print("Selected device: ", device)
 class DdpgAgent(object):
     """Interacts with and learns from the environment."""
 
-    def __init__(self, state_size, action_size, random_seed):
+    def __init__(self, config, state_size, action_size, random_seed):
         """Initialize an Agent object.
         Params
         ======
@@ -33,19 +38,30 @@ class DdpgAgent(object):
             action_size (int): dimension of each action
             random_seed (int): random seed
         """
+        self.config = config
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
         self.learn_step = 0  # for learning every n steps
+        sizes = {"state" : state_size, "action" : action_size}
+
+        self.log_path = os.path.join(os.path.dirname(__file__),'..','..','..',"data/runs/experiments")
 
         # Actor Network (w/ Target Network)
-        self.actor_local = Actor(state_size, action_size, random_seed).to(device)
-        self.actor_target = Actor(state_size, action_size, random_seed).to(device)
+        self.actor_local = Model(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
+        self.actor_target = Model(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)
+        fake_inputs = {"state" : torch.randn(1, state_size).to(device), "action" : torch.randn(1, action_size).to(device)}
+        writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "actor_graph"))
+        writer.add_graph(self.actor_local, fake_inputs)
+        writer.close()
         self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
 
         # Critic Network (w/ Target Network)
-        self.critic_local = Critic(state_size, action_size, random_seed).to(device)
-        self.critic_target = Critic(state_size, action_size, random_seed).to(device)
+        self.critic_local = Model(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
+        self.critic_target = Model(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
+        writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "critic_graph"))
+        writer.add_graph(self.critic_local, fake_inputs)
+        writer.close()
         self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
 
         self.copy_weights(self.critic_local, self.critic_target)
@@ -55,7 +71,8 @@ class DdpgAgent(object):
         self.noise = OUNoise(1 * action_size, random_seed)
 
         # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)
+        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)   
+        
 
     def copy_weights(self, source, target):
         """Copies the weights from the source to the target"""
@@ -80,7 +97,8 @@ class DdpgAgent(object):
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
-            action = self.actor_local(state).cpu().data.numpy()
+            inputs = {"state" : state}
+            action = self.actor_local(inputs).cpu().data.numpy()
         self.actor_local.train()
         if add_noise:
             #print(action)
@@ -107,14 +125,14 @@ class DdpgAgent(object):
 
         # ---------------------------- update critic ---------------------------- #
         # Get predicted next-state actions and Q values from target models
-        actions_next = self.actor_target(next_states)
-        Q_targets_next = self.critic_target(next_states, actions_next)
+        actions_next = self.actor_target({"state" : next_states})
+        Q_targets_next = self.critic_target({"state" : next_states, "action" : actions_next})
         # Compute Q targets for current states (y_i)
         Q_targets = rewards + (gamma * Q_targets_next * (1 - dones))
         # Current expected Q-values
-        Q_expected = self.critic_local(states, actions)
+        Q_expected = self.critic_local({"state" : states, "action" : actions})
         # Compute critic loss
-        critic_loss = F.mse_loss(Q_expected, Q_targets)
+        critic_loss = F.mse_loss(Q_expected, Q_targets[:,:1])
         # Minimize the loss
         self.critic_optimizer.zero_grad()
         critic_loss.backward()
@@ -123,8 +141,8 @@ class DdpgAgent(object):
 
         # ---------------------------- update actor ---------------------------- #
         # Compute actor loss
-        actions_pred = self.actor_local(states)
-        actor_loss = -self.critic_local(states, actions_pred).mean()
+        actions_pred = self.actor_local({"state" : states})
+        actor_loss = -self.critic_local({"state" : states, "action" : actions_pred}).mean()
         # Minimize the loss
         self.actor_optimizer.zero_grad()
         actor_loss.backward()

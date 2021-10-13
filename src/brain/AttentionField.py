@@ -5,9 +5,10 @@ import torch.nn.functional as F
 
 class AttentionField(object):
 
-    def __init__(self, k_dim, v_dim):
+    def __init__(self, k_dim, v_dim, reward_prop_thr):
         self.k_dim = k_dim
         self.v_dim = v_dim
+        self.reward_prop_thr = reward_prop_thr
         self.resetEntries()
 
     def scaledDotProduct(self, q, k, v, mask=None):
