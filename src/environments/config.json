@@ -27,6 +27,7 @@
                 "state" : [
                     {
                         "env_output" : [1,33],
+                        "neuron_type" : "sensory-motor",
                         "neuron" : 1,
                         "neuron_input" : [1,33]
                     }
@@ -34,6 +35,7 @@
                 "action" : [
                     {
                         "env_input" : [1,4],
+                        "neuron_type" : "sensory-motor",
                         "neuron" : 1,
                         "neuron_output" : [1,4]
                     }
@@ -53,6 +55,7 @@
                 "state" : [
                     {
                         "env_output" : [1,4],
+                        "neuron_type" : "sensory",
                         "neuron" : 1,
                         "neuron_input" : [1,4]
                     }
@@ -60,6 +63,7 @@
                 "action" : [
                     {
                         "env_input" : [1,2],
+                        "neuron_type" : "motor",
                         "neuron" : 1,
                         "neuron_output" : [1,2]
                     }

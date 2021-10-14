@@ -18,7 +18,7 @@ class Brain(object):
 
     def __init__(self):
 
-        self.neurons = {"all": [], "sensory" : [], "intern" : [], "motor" : []}
+        self.neurons = {"all": [], "sensory-motor" : [], "sensory" : [], "intern" : [], "motor" : []}
         with open(os.path.join(os.path.dirname(__file__),'config.json'), 'r') as j:
             self.config = json.load(j)
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
@@ -36,7 +36,7 @@ class Brain(object):
     def spawnNeurons(self): ### SIMPLIFY FUNCTION
         print("Brain: Spawning neurons")
         for neuron_type, type_neuron_config in self.config["neurons"].items():
-            if neuron_type == "sensory":
+            if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
                 for neuron_config in type_neuron_config["neurons"]:
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
                     self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
@@ -47,11 +47,6 @@ class Brain(object):
                     neuron_config.pop("quantity")
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
                     self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
-
-            elif neuron_type == "sensory" or neuron_type == "motor":
-                for neuron_config in type_neuron_config["neurons"]:
-                    neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
 
     def spawnOneNeuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
         empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
@@ -64,17 +59,18 @@ class Brain(object):
     def forward(self):
         # print("Brain: forward step {}".format(self.forward_step))
         if self.forward_step > 0:
-            [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
-        [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
+            [neuron["neuron"].backprop() for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+        [neuron["neuron"].forward() for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
         if self.neurons["intern"]:
             self.runAttentionFieldStep(1)
             if self.forward_step > 0:
                 [neuron["neuron"].backprop() for neuron in self.neurons["intern"]]
             [neuron["neuron"].forward() for neuron in self.neurons["intern"]]
-        self.runAttentionFieldStep(2)
+        if len(self.neurons["all"]) > len(self.neurons["sensory-motor"]):
+            self.runAttentionFieldStep(2)
         if self.forward_step > 0:
             [neuron["neuron"].backprop() for neuron in self.neurons["motor"]]
-        for neuron in self.neurons["motor"]:
+        for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]:
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
         self.forward_step += 1
@@ -109,9 +105,9 @@ class Brain(object):
             neurons[i]["neuron"].attended = attended[i]
 
     def setStateAndReward(self):
-        [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory"]]
-        [self.allocateReward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["motor"]]
-        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+        [self.allocateReward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
         [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["intern"]]
         [neuron["neuron"].setReward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["motor"]]
         
@@ -127,12 +123,10 @@ class Brain(object):
         
         for i, split_reward in enumerate(split_rewards):
             if abs(split_reward) > 0.01:
-                # print("flAG", neurons[i]["reward"])
                 if neurons[i]["reward"] == []:
                     neurons[i]["reward"] = split_reward
                 else:
                     neurons[i]["reward"] += split_reward
-                # print("flAG SA", neurons[i]["reward"])
                 if neurons[i]["neuron"].neuron_type != "sensory":
                     self.allocateReward(split_reward, neurons[i]["neuron"].attended)
 

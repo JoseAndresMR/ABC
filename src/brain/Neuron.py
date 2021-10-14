@@ -26,7 +26,12 @@ class Neuron(object):
         self.buildRlAgent()
 
     def buildRlAgent(self):
-        if self.neuron_type == "sensory":
+        if self.neuron_type == "sensory-motor":
+            self.state_size = self.environment_signal_size[0]
+            self.action_size = self.environment_signal_size[1]
+            self.key = None
+
+        elif self.neuron_type == "sensory":
             self.state_size = self.environment_signal_size
             self.action_size = self.k_dim + self.v_dim
             self.key = np.random.rand(1,self.k_dim)
@@ -81,7 +86,9 @@ class Neuron(object):
         self.next_state = None
 
     def decomposeAction(self):
-        if self.neuron_type == "sensory":
+        if self.neuron_type == "sensory-motor":
+            self.output_value = self.action
+        elif self.neuron_type == "sensory":
             self.key = self.action[:,:self.k_dim]
             self.output_value = self.action[:,self.k_dim:]
         elif self.neuron_type == "intern":
