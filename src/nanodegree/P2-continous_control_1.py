@@ -55,9 +55,9 @@ def ddpg(n_episodes=1000, max_t=3000, print_every=25):
             #print("actions shape", actions.shape)
             env_info = env.step(actions)[brain_name]      # execute the selected actions and save the new information about the environment
             rewards = env_info.rewards                    # get the rewards
-            if env_info.rewards != [0.0]:
-                print("flag", env_info.rewards )
-                print("flag act", actions)
+            # if env_info.rewards != [0.0]:
+                # print("flag", env_info.rewards )
+                # print("flag act", actions)
             next_states = env_info.vector_observations    # get the resulting states
             dones = env_info.local_done                   # check whether episodes have finished
             agent.step(states, actions, rewards, next_states, dones)  # pass the information to the agent

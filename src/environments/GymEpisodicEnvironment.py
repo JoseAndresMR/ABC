@@ -55,8 +55,8 @@ class GymEpisodicEnvironment(Environment):
             if self.current_episode % self.print_every == 0:
                 print('\rEpisode {}\tAverage Score: {:.2f}'.format(self.current_episode, np.mean(self.scores_deque)))
                 # plt.figure()
-                plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-                plt.title("Ennvironment: score")
+                # plt.plot(np.arange(1, len(self.scores)+1), self.scores)
+                # plt.title("Ennvironment: score")
                 # plt.ylabel('Score')
                 # plt.xlabel('Episode #')
                 # plt.draw()
@@ -67,7 +67,7 @@ class GymEpisodicEnvironment(Environment):
                 self.tensorboard_writer.add_scalar('scores',
                                                 self.scores_deque[-1],
                                                 self.current_episode)
-            self.e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
+            self.e_scores = np.zeros(1)  # the scores of an episode for each of the 20 reachers
 
         env_finished = self.current_episode == self.n_episodes + 1
         return ([reward], np.array([observation]), [done], env_finished)

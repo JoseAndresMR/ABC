@@ -1,10 +1,11 @@
 import numpy as np
-import os
+import os, copy
 from collections import deque
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
 from brain.rl_agents.DdpgAgent import DdpgAgent
+from brain.rl_agents.DQNAgent import DQNAgent
 
 class Neuron(object):
 
@@ -52,13 +53,15 @@ class Neuron(object):
         self.config["agent"]["ID"] = self.config["ID"]
         if self.config["agent"]["type"] == "DDPG":
             self.rl_agent = DdpgAgent(self.config["agent"], self.state_size, self.action_size, random_seed = 2)
+        if self.config["agent"]["type"] == "DQN":
+            self.rl_agent = DQNAgent(self.config["agent"], self.state_size, self.action_size, random_seed = 2)
 
     def setNextInputValue(self, state):
         self.step += 1
         if type(self.state) != type(np.array(1)):
-            self.state = state
+            self.state = copy.deepcopy(state)
         else:
-            self.next_state = state
+            self.next_state = copy.deepcopy(state)
 
     def setReward(self, reward):
         if reward == []:

@@ -12,15 +12,15 @@ class UnityEpisodicEnvironment(Environment):
         self.brain_name = self.env.brain_names[0]
         brain = self.env.brains[self.brain_name]
         env_info = self.env.reset(train_mode=True)[self.brain_name]
-        num_agents = len(env_info.agents)
+        self.num_agents = len(env_info.agents)
         action_size = brain.vector_action_space_size
         states = env_info.vector_observations
         state_size = states.shape[1]
-        self.env_info = {"num_agents" : num_agents, "state_size" : state_size, "action_size" : action_size}
+        self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "action_size" : action_size}
         # self.fig = plt.figure()
         # self.ax = self.fig.add_subplot(111)
 
-    def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=3):
+    def startEpisodes(self, n_episodes=10000, max_t=3000, success_avg = 30, print_every=3):
         self.n_episodes, self.max_t, self.print_every, self.success_avg = n_episodes, max_t, print_every, success_avg
         self.current_episode, self.current_t = 0, 0
 
@@ -28,7 +28,7 @@ class UnityEpisodicEnvironment(Environment):
         self.scores = []
         env_info = self.env.reset(train_mode=True)[self.brain_name]
         self.states = env_info.vector_observations  # get the current states
-        self.e_scores = np.zeros(1)  # the scores of an episode for each of the 20 reachers
+        self.e_scores = np.zeros(self.num_agents)  # the scores of an episode for each of the 20 reachers
         return self.states
 
     def step(self):
@@ -50,8 +50,6 @@ class UnityEpisodicEnvironment(Environment):
         if episode_finished:
             env_info = self.env.reset(train_mode=True)[self.brain_name]
             self.states = env_info.vector_observations  # get the current states
-            self.current_episode += 1
-            self.current_t = 0
 
             avg_score = np.mean(self.e_scores)  # the average score of the agents
             self.scores_deque.append(avg_score)
@@ -63,8 +61,8 @@ class UnityEpisodicEnvironment(Environment):
             if self.current_episode % self.print_every == 0:
                 print('\rEpisode {}\tAverage Score: {:.2f}'.format(self.current_episode, np.mean(self.scores_deque)))
                 # plt.figure()
-                plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-                plt.title("Ennvironment: score")
+                # plt.plot(np.arange(1, len(self.scores)+1), self.scores)
+                # plt.title("Ennvironment: score")
                 # plt.ylabel('Score')
                 # plt.xlabel('Episode #')
                 # plt.draw()
@@ -75,8 +73,9 @@ class UnityEpisodicEnvironment(Environment):
                 self.tensorboard_writer.add_scalar('scores',
                                                 self.scores_deque[-1],
                                                 self.current_episode)
-            self.e_scores = np.zeros(20)  # the scores of an episode for each of the 20 reachers
-
+            self.e_scores = np.zeros(self.num_agents)  # the scores of an episode for each of the 20 reachers
+            self.current_episode += 1
+            self.current_t = 0
         env_finished = self.current_episode == self.n_episodes + 1
         return (rewards, next_states, dones, env_finished)
 

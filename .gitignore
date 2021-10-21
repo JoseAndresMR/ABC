@@ -132,3 +132,4 @@ dmypy.json
 # Reinforcement Learning environments
 bin/environments/
 data/
+runs/

@@ -59,8 +59,8 @@ class Brain(object):
     def forward(self):
         # print("Brain: forward step {}".format(self.forward_step))
         if self.forward_step > 0:
-            [neuron["neuron"].backprop() for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
-        [neuron["neuron"].forward() for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+            [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
         if self.neurons["intern"]:
             self.runAttentionFieldStep(1)
             if self.forward_step > 0:
@@ -69,7 +69,7 @@ class Brain(object):
         if len(self.neurons["all"]) > len(self.neurons["sensory-motor"]):
             self.runAttentionFieldStep(2)
         if self.forward_step > 0:
-            [neuron["neuron"].backprop() for neuron in self.neurons["motor"]]
+            [neuron["neuron"].backprop() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]:
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
@@ -107,9 +107,9 @@ class Brain(object):
     def setStateAndReward(self):
         [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
         [self.allocateReward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
-        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory"]]
         [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["intern"]]
-        [neuron["neuron"].setReward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["motor"]]
+        [neuron["neuron"].setReward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         
         self.scores_deque.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["motor"]]).sum())
         self.scores.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["motor"]]).sum())

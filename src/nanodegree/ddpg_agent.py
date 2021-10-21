@@ -13,9 +13,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 256        # minibatch size
-GAMMA = 0.99            # discount factor
-TAU = 1e-3              # for soft update of target parameters
-LR_ACTOR = 1e-4         # learning rate of the actor
+GAMMA = 0.995            # discount factor
+TAU = 1e-2              # for soft update of target parameters
+LR_ACTOR = 1e-3         # learning rate of the actor
 LR_CRITIC = 1e-3        # learning rate of the critic
 LEARN_EVERY = 2         # learn every LEARN_EVERY steps
 LEARN_STEPS = 1            # how often to execute the learn-function each LEARN_EVERY steps

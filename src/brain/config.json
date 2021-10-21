@@ -7,8 +7,8 @@
                         "type" : "DDPG",
                         "additional_dim" : [33,4],
                         "models": {
-                            "actor" : "actor1",
-                            "critic" : "critic1"
+                            "actor" : "actor_extended",
+                            "critic" : "critic_extended"
                         }
                     }
                 }
