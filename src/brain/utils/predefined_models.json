@@ -63,7 +63,7 @@
             },
             {
                 "type" : "linear",
-                "size" : 128,
+                "size" : "state",
                 "features" : ["leaky_relu"]
             },
             {

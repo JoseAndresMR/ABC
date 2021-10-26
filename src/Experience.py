@@ -52,7 +52,7 @@ class Experience(object):
         for env_conf in self.meta_environment.config["schedule"]:
             if env_conf["active"]:
                 for map in env_conf["signals_map"]["action"]:
-                    if self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"] != []:
+                    if self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"].size != 0:
                         neuron_output = map["neuron_output"]
                         env_input = map["env_input"]
                         self.meta_environment.environments[env_conf["env"]]["action"] = addMatrixToTarget(self.meta_environment.environments[env_conf["env"]]["action"],

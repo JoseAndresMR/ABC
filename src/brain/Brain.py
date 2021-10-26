@@ -19,7 +19,7 @@ class Brain(object):
     def __init__(self):
 
         self.neurons = {"all": [], "sensory-motor" : [], "sensory" : [], "intern" : [], "motor" : []}
-        with open(os.path.join(os.path.dirname(__file__),'config.json'), 'r') as j:
+        with open(os.path.join(os.path.dirname(__file__),'brain_config.json'), 'r') as j:
             self.config = json.load(j)
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
         self.attention_field = AttentionField(self.k_dim, self.v_dim, self.config["attention_field"]["reward_backprop_thr"])

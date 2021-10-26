@@ -16,7 +16,8 @@ class UnityEpisodicEnvironment(Environment):
         action_size = brain.vector_action_space_size
         states = env_info.vector_observations
         state_size = states.shape[1]
-        self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "action_size" : action_size}
+        action_type = brain.vector_action_space_type
+        self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
         # self.fig = plt.figure()
         # self.ax = self.fig.add_subplot(111)
 
@@ -34,6 +35,8 @@ class UnityEpisodicEnvironment(Environment):
     def step(self):
         episode_finished = False
         if self.current_t < self.max_t:
+            # if self.env_info["action_type"] == "discrete":
+            #     self.actions = np.random.choice(np.arange(len(self.actions[0])),p=self.actions[0]) ### TODO: Fix when parallelization
             env_info = self.env.step(self.actions)[self.brain_name]      # execute the selected actions and save the new information about the environment
             rewards = env_info.rewards                    # get the rewards
             next_states = env_info.vector_observations    # get the resulting states

@@ -7,7 +7,7 @@ from copy import deepcopy
 class MetaEnvironment(object):
 
     def __init__(self,):
-        with open(os.path.join(os.path.dirname(__file__),'config.json'), 'r') as j:
+        with open(os.path.join(os.path.dirname(__file__),'envs_config.json'), 'r') as j:
             self.config = json.load(j)
         self.environments = {}
         self.addEnvironments()

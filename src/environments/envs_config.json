@@ -2,9 +2,9 @@
     "environments": [
         {
             "origin" : "unity",
-            "id" : "reacher",
+            "id" : "banana",
             "temporality" : "episodic",
-            "file_path" : "/home/jamillan4i/Libraries/ABC/bin/environments/Reacher_1/Reacher.x86_64"
+            "file_path" : "/home/jamillan4i/Libraries/ABC/bin/environments/Banana_Linux/Banana.x86_64"
         },
         {
             "origin" : "gym",
@@ -13,10 +13,38 @@
             "name" : "CartPole-v1"
         }
     ],
-    "schedule" :   [
+    "schedule" : [
+        {
+            "env" : "banana",
+            "active" : true,
+            "play_ID" : 1,
+            "start_type" : "step",
+            "start_value" : 0,
+            "max_episodes" : 10000,
+            "max_t" : 3000,
+            "success_avg" : 30,
+            "signals_map" : {
+                "state" : [
+                    {
+                        "env_output" : [1,37],
+                        "neuron_type" : "sensory-motor",
+                        "neuron" : 1,
+                        "neuron_input" : [1,37]
+                    }
+                ],
+                "action" : [
+                    {
+                        "env_input" : [1,1],
+                        "neuron_type" : "sensory-motor",
+                        "neuron" : 1,
+                        "neuron_output" : [1,1]
+                    }
+                ]
+            }
+        },
         {
             "env" : "reacher",
-            "active" : true,
+            "active" : false,
             "play_ID" : 1,
             "start_type" : "step",
             "start_value" : 0,
