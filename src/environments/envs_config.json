@@ -2,9 +2,9 @@
     "environments": [
         {
             "origin" : "unity",
-            "id" : "banana",
+            "id" : "reacher",
             "temporality" : "episodic",
-            "file_path" : "/home/jamillan4i/Libraries/ABC/bin/environments/Banana_Linux/Banana.x86_64"
+            "file_path" : "/home/jamillan4i/Libraries/ABC/bin/environments/Reacher_1/Reacher.x86_64"
         },
         {
             "origin" : "gym",
@@ -16,7 +16,7 @@
     "schedule" : [
         {
             "env" : "banana",
-            "active" : true,
+            "active" : false,
             "play_ID" : 1,
             "start_type" : "step",
             "start_value" : 0,
@@ -44,7 +44,7 @@
         },
         {
             "env" : "reacher",
-            "active" : false,
+            "active" : true,
             "play_ID" : 1,
             "start_type" : "step",
             "start_value" : 0,

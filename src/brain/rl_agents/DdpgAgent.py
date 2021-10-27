@@ -103,7 +103,8 @@ class DdpgAgent(object):
         self.actor_local.train()
         if add_noise:
             action += noise_factor * self.noise.sample()
-        return np.clip(action, -1, 1)
+        # return np.clip(action, -1, 1)
+        return action
 
     def reset(self):
         self.noise.reset()

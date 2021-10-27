@@ -58,6 +58,16 @@ class NnModel(nn.Module):
                 # size = ((in_channels - kernel_size + 2*padding)/stride) + 1
                 self.layers.append(nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding))
 
+            if layer_config["type"] == "rnn":
+                input_size = self.config["layers"][i-1]["size"]
+                hidden_size = self.config["layers"][i]["hidden_size"]
+                num_layers = self.config["layers"][i]["num_layers"]
+                nonlinearity = self.config["layers"][i]["nonlinearity"]
+                self.config["layers"][i]["size"] = hidden_size
+                self.layers.append(nn.RNN(input_size = input_size, hidden_size = hidden_size,
+                                                     num_layers = num_layers, nonlinearity = nonlinearity,
+                                                     batch_first = True))
+
             if layer_config["type"] == "maxpool2d":
                 kernel_size = self.config["layers"][i]["kernel_size"]
                 stride = self.config["layers"][i]["stride"]
@@ -65,6 +75,9 @@ class NnModel(nn.Module):
 
             if layer_config["type"] == "softmax":
                 self.layers.append(nn.Softmax(dim= 1))
+
+            if layer_config["type"] == "clamp": ### TODO
+                self.layers.append(torch.clamp(min= 1))
 
         self.reset_parameters()
 
@@ -80,16 +93,32 @@ class NnModel(nn.Module):
         # x = self.bn1(inputs["state"])
         x = inputs["state"]
         for i, layer_config in enumerate(self.config["layers"]):
+            ## Prior concatenations
             if "concat" in layer_config.keys():
                 for input in layer_config["concat"]:
                     x = torch.cat((x, inputs[input]), dim=1)
-            x = self.layers[i](x)
+
+            ## Main layers
+            if layer_config["type"] == "rnn":
+                x, _ = self.layers[i](x)
+            else:
+                x = self.layers[i](x)
+
+            ## Post processing
             if "features" in layer_config.keys():
                 for feature in layer_config["features"]:
-                    if feature == "leaky_relu":
+                    if feature == "unsqueeze":
+                        x = x.unsqueeze(1)  ### TODO: enter as feature parameter
+                    elif feature == "squeeze":
+                        x = x.squeeze(1)  ### TODO: enter as feature parameter
+                    elif feature == "leaky_relu":
                         x = F.leaky_relu(x)
-                    if feature == "tanh":
+                    elif feature == "tanh":
                         x = torch.tanh(x)
-                    if feature == "flatten":
+                    elif feature == "sigmoid":
+                        x = torch.sigmoid(x)
+                    elif feature == "flatten":
                         x = torch.flatten(x, 1)
+            if "clip" in layer_config.keys():
+                x = torch.clip(x, layer_config["clip"][0], layer_config["clip"][1])
         return x
