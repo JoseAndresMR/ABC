@@ -1,3 +1,4 @@
+from logging import log
 import numpy as np
 import os
 import random
@@ -32,7 +33,7 @@ print("Selected device: ", device)
 class DQNAgent(object):
     """Interacts with and learns from the environment."""
 
-    def __init__(self, config, state_size, action_size, random_seed):
+    def __init__(self, config, log_path, state_size, action_size, random_seed):
         """Initialize an Agent object.
         Params
         ======
@@ -41,6 +42,7 @@ class DQNAgent(object):
             random_seed (int): random seed
         """
         self.config = config
+        self.log_path = log_path
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
@@ -74,8 +76,7 @@ class DQNAgent(object):
         # Save experience in replay memory
         td = self.td(state, action, reward, next_state, done) + PRIORITIZED_ER_e
         self.memory.add(state, action, reward, next_state, done, td)
-        
-        
+
         # Learn every UPDATE_EVERY time steps.
         self.learn_step = (self.learn_step + 1) % UPDATE_EVERY
         if self.learn_step == 0:

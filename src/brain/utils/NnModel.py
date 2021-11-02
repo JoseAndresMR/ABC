@@ -27,7 +27,7 @@ class NnModel(nn.Module):
         self.config = config
         self.seed = torch.manual_seed(seed)
         if type(self.config) == str:
-            with open(os.path.join(os.path.dirname(__file__),'predefined_models.json'), 'r') as j:
+            with open(os.path.join(os.path.dirname(__file__),"..", "configs",'predefined_models.json'), 'r') as j:
                 self.config = json.load(j)[self.config]
 
         self.layers = nn.ModuleList()

@@ -6,13 +6,12 @@ from copy import deepcopy
 
 class MetaEnvironment(object):
 
-    def __init__(self,):
-        with open(os.path.join(os.path.dirname(__file__),'envs_config.json'), 'r') as j:
-            self.config = json.load(j)
+    def __init__(self,config, log_path):
+        self.config = config
+        self.log_path = log_path
         self.environments = {}
         self.addEnvironments()
 
-    
     def addEnvironments(self):
         empty_env = {"env" : None, "state" : [], "action" : [], "reward" : [], "done" : False, "finished" : False, "info" : {}, "active" : False}
         
@@ -21,10 +20,10 @@ class MetaEnvironment(object):
             self.environments[env["id"]] = deepcopy(empty_env)
             if env["origin"] == "unity":
                 if env["temporality"] == "episodic":
-                    self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(env["file_path"], env["id"])
+                    self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(env["file_path"], env["id"], self.log_path)
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
-                    self.environments[env["id"]]["env"] = GymEpisodicEnvironment(env["id"], env["name"])
+                    self.environments[env["id"]]["env"] = GymEpisodicEnvironment(env["id"], env["name"], self.log_path)
             self.environments[env["id"]]["info"] = self.environments[env["id"]]["env"].getEnvironmentInfo()
 
     def startEnvironmentsEpisodes(self):

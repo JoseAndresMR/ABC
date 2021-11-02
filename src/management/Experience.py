@@ -1,4 +1,6 @@
-import json, os
+import sys,json, os
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 import numpy as np
 
 from environments.MetaEnvironment import MetaEnvironment
@@ -6,13 +8,10 @@ from brain.Brain import Brain
 
 class Experience(object):
 
-    def __init__(self):
-
-        self.meta_environment = MetaEnvironment()
-        self.brain = Brain()
-        with open(os.path.join(os.path.dirname(__file__),'config.jsonc'), 'r') as j:
-            self.config = json.load(j)
-        self.loop()
+    def __init__(self, config, log_path):
+        self.meta_environment = MetaEnvironment({"environments": config["envs"], "schedule": config["schedule"]}, log_path)
+        self.brain = Brain(config["brain"], log_path)
+        self.config = config
 
     def loop(self):
         print("Experience: Starting loop")
@@ -31,7 +30,7 @@ class Experience(object):
             self.meta_environment.closeEnvironments()
 
     def allocateEnvironementOutput(self):
-        for env_conf in self.meta_environment.config["schedule"]:
+        for env_conf in self.config["schedule"]:
             if env_conf["active"]:
                 first_dim = self.meta_environment.environments[env_conf["env"]]["state"].shape[0]
                 for map in env_conf["signals_map"]["state"]:
@@ -49,7 +48,7 @@ class Experience(object):
         self.brain.setStateAndReward()
 
     def allocateBrainOutput(self):
-        for env_conf in self.meta_environment.config["schedule"]:
+        for env_conf in self.config["schedule"]:
             if env_conf["active"]:
                 for map in env_conf["signals_map"]["action"]:
                     if self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"].size != 0:
@@ -72,5 +71,3 @@ def addMatrixToTarget(target_matrix, target_dim, added_matrix):
             target_matrix = np.concatenate((target_matrix, np.zeros((target_matrix.shape[0], target_dim[0]-1 - target_matrix.shape[1])), added_matrix),1)
 
     return target_matrix
-
-Experience()

@@ -1,3 +1,4 @@
+from logging import log
 import numpy as np
 import os, copy
 from collections import deque
@@ -9,17 +10,17 @@ from brain.rl_agents.DQNAgent import DQNAgent
 
 class Neuron(object):
 
-    def __init__(self, neuron_type, config, k_dim, v_dim, environment_signal_size = None):
+    def __init__(self, neuron_type, config, log_path, k_dim, v_dim, environment_signal_size = None):
 
         self.state, self.next_state, self.action, self.reward = None, None, None, None
         self.neuron_type = neuron_type
+        self.log_path = log_path
         self.step = 0
         self.config = config
         self.k_dim, self. v_dim, self.environment_signal_size = k_dim, v_dim, environment_signal_size
         self.attended = []
         self.scores_deque = deque(maxlen=1000)
         self.scores = []
-        log_path = os.path.join(os.path.dirname(__file__),'..','..',"data/runs/experiments")
         self.tensorboard_writer = SummaryWriter(os.path.join(log_path,"neurons", "{}".format(self.config["ID"])))
         self.log_every = 5000
         self.no_reward_penalty = 0
@@ -52,9 +53,9 @@ class Neuron(object):
 
         self.config["agent"]["ID"] = self.config["ID"]
         if self.config["agent"]["type"] == "DDPG":
-            self.rl_agent = DdpgAgent(self.config["agent"], self.state_size, self.action_size, random_seed = 2)
+            self.rl_agent = DdpgAgent(self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed = 2)
         if self.config["agent"]["type"] == "DQN":
-            self.rl_agent = DQNAgent(self.config["agent"], self.state_size, self.action_size, random_seed = 2)
+            self.rl_agent = DQNAgent(self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed = 2)
 
     def setNextInputValue(self, state):
         self.step += 1

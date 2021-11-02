@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from environments.Environment import Environment
 
 class UnityEpisodicEnvironment(Environment):
-    def __init__(self, file_path, id):
-        super().__init__(id)
+    def __init__(self, file_path, id, log_path):
+        super().__init__(id, log_path)
         # self.file_path = os.path.join(os.path.dirname(__file__), "..","..","bin",file_path)
         self.env = UnityEnvironment(file_name=file_path, no_graphics=True)
         self.brain_name = self.env.brain_names[0]

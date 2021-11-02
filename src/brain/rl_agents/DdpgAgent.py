@@ -31,7 +31,7 @@ print("Selected device: ", device)
 class DdpgAgent(object):
     """Interacts with and learns from the environment."""
 
-    def __init__(self, config, state_size, action_size, random_seed):
+    def __init__(self, config, log_path, state_size, action_size, random_seed):
         """Initialize an Agent object.
         Params
         ======
@@ -40,13 +40,12 @@ class DdpgAgent(object):
             random_seed (int): random seed
         """
         self.config = config
+        self.log_path = log_path
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
         self.learn_step = 0  # for learning every n steps
         sizes = {"state" : state_size, "action" : action_size}
-
-        self.log_path = os.path.join(os.path.dirname(__file__),'..','..','..',"data/runs/experiments")
 
         # Actor Network (w/ Target Network)
         self.actor_local = NnModel(deepcopy(config["models"]["actor"]), sizes, random_seed).to(device)

@@ -16,17 +16,16 @@ from brain.AttentionField import AttentionField
 
 class Brain(object):
 
-    def __init__(self):
+    def __init__(self, config, log_path):
 
         self.neurons = {"all": [], "sensory-motor" : [], "sensory" : [], "intern" : [], "motor" : []}
-        with open(os.path.join(os.path.dirname(__file__),'brain_config.json'), 'r') as j:
-            self.config = json.load(j)
+        self.config = config
+        self.log_path = os.path.join(log_path,"brain")
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
         self.attention_field = AttentionField(self.k_dim, self.v_dim, self.config["attention_field"]["reward_backprop_thr"])
         self.spawnNeurons()
         self.forward_step = 0
-        log_path = os.path.join(os.path.dirname(__file__),'..','..',"data/runs/experiments")
-        self.tensorboard_writer = SummaryWriter(os.path.join(log_path,"brain"))
+        self.tensorboard_writer = SummaryWriter(self.log_path)
 
         # self.fig = plt.figure()
         # self.ax = self.fig.add_subplot(111)
@@ -51,7 +50,7 @@ class Brain(object):
     def spawnOneNeuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
         empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
         neuron = deepcopy(empty_neuron)
-        neuron["neuron"] = Neuron(neuron_type, config, k_dim, v_dim, additional_dim)
+        neuron["neuron"] = Neuron(neuron_type, config, self.log_path, k_dim, v_dim, additional_dim)
         neuron["info"]["type"] = neuron_type
         self.neurons["all"].append(neuron)
         self.neurons[neuron_type].append(neuron)

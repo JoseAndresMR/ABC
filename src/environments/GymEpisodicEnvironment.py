@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 from environments.Environment import Environment
 
 class GymEpisodicEnvironment(Environment):
-    def __init__(self,id, name):
-        super().__init__(id)
+    def __init__(self,id, name, log_path):
+        super().__init__(id, log_path)
         self.env = gym.make(name)
         observations = self.env.reset()
         state_type = type(self.env.observation_space)

@@ -1,0 +1,15 @@
+{
+    "base_configs": {
+        "envs": "config",
+        "brain": "config",
+        "schedule": "config"
+    },
+    "alterations": [
+        {},
+        {"schedule" : "config_2"},
+        {"envs": "config_2", "schedule" :  "config_3"},
+        {"brain": "config_2"}
+    ],
+    "ID" : "test_experience",
+    "iterations" : {}
+}
