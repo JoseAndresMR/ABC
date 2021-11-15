@@ -17,12 +17,12 @@ from torch.utils.tensorboard import SummaryWriter
 
 BUFFER_SIZE = int(1e6)  # replay buffer size
 BATCH_SIZE = 256        # minibatch size
-GAMMA = 0.995            # discount factor
+GAMMA = 0.99            # discount factor
 TAU = 1e-2              # for soft update of target parameters
 LR_ACTOR = 1e-3         # learning rate of the actor
 LR_CRITIC = 1e-3        # learning rate of the critic
-LEARN_EVERY = 32         # learn every LEARN_EVERY steps
-LEARN_STEPS = 16            # how often to execute the learn-function each LEARN_EVERY steps
+LEARN_EVERY = 8         # learn every LEARN_EVERY steps
+LEARN_STEPS = 4            # how often to execute the learn-function each LEARN_EVERY steps
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Selected device: ", device)

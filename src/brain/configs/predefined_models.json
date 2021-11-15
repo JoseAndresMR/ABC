@@ -35,21 +35,6 @@
             },
             {
                 "type" : "linear",
-                "size" : 64,
-                "features" : ["leaky_relu"]
-            },
-            {
-                "type" : "linear",
-                "size" : 32,
-                "features" : ["leaky_relu"]
-            },
-            {
-                "type" : "linear",
-                "size" : 16,
-                "features" : ["leaky_relu"]
-            },
-            {
-                "type" : "linear",
                 "size" : "action",
                 "features" : ["tanh"],
                 "clip" : [-1, 1]
@@ -173,23 +158,6 @@
             {
                 "type" : "linear",
                 "size" : 128,
-                "features" : ["leaky_relu"]
-            },
-            {
-                "type" : "linear",
-                "size" : 64,
-                "features" : ["leaky_relu"],
-                "concat" : ["action"]
-            },
-            {
-                "type" : "linear",
-                "size" : 32,
-                "features" : ["leaky_relu"],
-                "concat" : ["action"]
-            },
-            {
-                "type" : "linear",
-                "size" : 16,
                 "features" : ["leaky_relu"],
                 "concat" : ["action"]
             },

@@ -10,12 +10,20 @@ class GymEpisodicEnvironment(Environment):
         self.env = gym.make(name)
         observations = self.env.reset()
         state_type = type(self.env.observation_space)
-        state_size = self.env.observation_space.shape
-        action_size = self.env.action_space.n
+        if state_type == gym.spaces.box.Box:
+            state_size = self.env.observation_space.shape
+        elif state_type == gym.spaces.discrete.Discrete:
+            state_size = self.env.observation_space.n
+            
         action_type = type(self.env.action_space)
+        if action_type == gym.spaces.box.Box:
+            action_size = self.env.action_space.shape
+        elif action_type == gym.spaces.discrete.Discrete:
+            action_size = self.env.action_space.n
+        
         self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
 
-    def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=3):
+    def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=50):
         self.n_episodes, self.max_t, self.print_every, self.success_avg = n_episodes, max_t, print_every, success_avg
         self.current_episode, self.current_t = 0, 0
 
@@ -30,7 +38,7 @@ class GymEpisodicEnvironment(Environment):
         if self.current_t < self.max_t:
             if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
                 self.actions = np.argmax(self.actions)
-            observation, reward, done, info = self.env.step(self.actions)      # execute the selected actions and save the new information about the environment
+            observation, reward, done, info = self.env.step(self.actions[0])      # execute the selected actions and save the new information about the environment
             self.states = np.array([observation])
             self.e_scores += [reward]
             self.current_t += 1

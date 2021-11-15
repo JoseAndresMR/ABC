@@ -1,8 +1,8 @@
 {
     "base_configs": {
-        "envs": "config",
-        "brain": "config",
-        "schedule": "config"
+        "envs": "config_biwalker",
+        "brain": "config_biwalker",
+        "schedule": "config_biwalker"
     },
     "alterations": [
         {},

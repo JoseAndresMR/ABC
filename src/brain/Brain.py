@@ -147,11 +147,11 @@ class Brain(object):
         # plt.savefig('Attention.png')
 
         ### Reward
-        fig, ax = plt.subplots()
-        plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-        plt.title("Brain: Reward")
-        plt.ylabel('Score')
-        plt.xlabel('Step #')
+        # fig, ax = plt.subplots()
+        # plt.plot(np.arange(1, len(self.scores)+1), self.scores)
+        # plt.title("Brain: Reward")
+        # plt.ylabel('Score')
+        # plt.xlabel('Step #')
         self.tensorboard_writer.add_scalar('avg_score',
                                         np.mean(self.scores_deque),
                                         self.forward_step)
