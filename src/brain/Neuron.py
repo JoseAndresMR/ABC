@@ -9,8 +9,19 @@ from brain.rl_agents.DdpgAgent import DdpgAgent
 from brain.rl_agents.DQNAgent import DQNAgent
 
 class Neuron(object):
-
+    """ Wrapping of the RL agent that defines each neuron. Interface to the Brain architecture. """
+    
     def __init__(self, neuron_type, config, log_path, k_dim, v_dim, environment_signal_size = None):
+        """ Definition and initilialisation of the structure of the nueron.
+        
+        Args:
+            neuron_type (string): Wether sensory, intern, motor or sensory-motor.
+            config (dict): Definition of the RL agent at the core of the nueron.
+            log_path (string): Path on disk to store gathered information about the experience
+            k_dim (int): Keys and queries length
+            v_dim (int): Value length
+            environment_signal_size (): Input or output dim, or both depending on type.
+        """
 
         self.state, self.next_state, self.action, self.reward = None, None, None, None
         self.neuron_type = neuron_type
@@ -28,6 +39,9 @@ class Neuron(object):
         self.buildRlAgent()
 
     def buildRlAgent(self):
+        """Define state, action, key, query and value sizes depeding on neuron type.
+        Create the object of the RL agent. """
+        
         if self.neuron_type == "sensory-motor":
             self.state_size = self.environment_signal_size[0]
             self.action_size = self.environment_signal_size[1]
@@ -58,6 +72,11 @@ class Neuron(object):
             self.rl_agent = DQNAgent(self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed = 2)
 
     def setNextInputValue(self, state):
+        """ Receive next state from the Brain.
+        
+        Args:
+            state (np.array): Observations taken by the agent on the Environment. """
+
         self.step += 1
         if type(self.state) != type(np.array(1)):
             self.state = copy.deepcopy(state)
@@ -65,6 +84,11 @@ class Neuron(object):
             self.next_state = copy.deepcopy(state)
 
     def setReward(self, reward):
+        """ Receive reward from the Brain
+        
+        Args:
+            reward (int): Reward taken by the agent from the Environment. """
+
         if reward == []:
             reward = self.no_reward_penalty
         self.reward = reward
@@ -76,11 +100,18 @@ class Neuron(object):
                                     self.step)
 
     def forward(self):
+        """ Make the RL agent to apply its policy given the current state and generate an action.
+
+        Results:
+            action (np.array): Selected action. """
+
         self.action = self.rl_agent.act(self.state)
         self.decomposeAction()
         return self.action
 
     def backprop(self):
+        """ Apply the learning step and actualize state. """
+
         if type(self.next_state) != type(np.array(1)):
             done = True
         else:
@@ -90,6 +121,8 @@ class Neuron(object):
         self.next_state = None
 
     def decomposeAction(self):
+        """ Split the outcome of the RL agent into the pieces of the attention mechanism. """
+
         if self.neuron_type == "sensory-motor":
             self.output_value = self.action
         elif self.neuron_type == "sensory":
@@ -102,12 +135,3 @@ class Neuron(object):
         elif self.neuron_type == "motor":
             self.query = self.action[:,:self.k_dim]
             self.output_value = self.action[:,self.k_dim:]
-
-    def makeRewardPlot(self):
-        # self.fig = plt.figure()
-        # self.ax = self.fig.add_subplot(111)
-        plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-        plt.ylabel('Score')
-        plt.xlabel('Step #')
-        plt.title("Neuron: Score")
-        plt.show()

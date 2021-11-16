@@ -29,15 +29,17 @@ print("Selected device: ", device)
 
 
 class DdpgAgent(object):
-    """Interacts with and learns from the environment."""
+    """RL agent of Deep Deterministic Policy Gradient type."""
 
     def __init__(self, config, log_path, state_size, action_size, random_seed):
-        """Initialize an Agent object.
-        Params
-        ======
-            state_size (int): dimension of each state
-            action_size (int): dimension of each action
-            random_seed (int): random seed
+        """Initialize agent paramenters, models, and memory.
+        
+        Args:
+            config (dict): configuration of parameters and model structure.
+            log_path (string): Path on disk to store gathered information about the experience.
+            state_size (int): Dimension of each state.
+            action_size (int): Dimension of each action.
+            random_seed (int): Random seed.
         """
         self.config = config
         self.log_path = log_path
@@ -75,12 +77,23 @@ class DdpgAgent(object):
         
 
     def copy_weights(self, source, target):
-        """Copies the weights from the source to the target"""
+        """Copies the weights from the source to the target.
+        
+        Args:
+            source (NnModel): model where the weights are copied from. 
+            target (NnModel): model where the weights are copied to. """
         for target_param, source_param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(source_param.data)
 
     def step(self, states, actions, rewards, next_states, dones):
-        """Save experience in replay memory, and use random sample from buffer to learn."""
+        """Save experience in replay memory, and use random sample from buffer to learn.
+        
+        Args:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         # Save experiences / rewards
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
             self.memory.add(state, action, reward, next_state, done)
@@ -93,7 +106,15 @@ class DdpgAgent(object):
                 self.learn(experiences, GAMMA)
 
     def act(self, state, add_noise=True, noise_factor=1.0):
-        """Returns actions for given state as per current policy."""
+        """Returns actions for given state as per current policy.
+        
+        Args:
+            state (np.array): Current observation from the Environment.
+            add_noise (bool): Wether to apply noise over the selected action or not. 
+            noise_factor (float): Measure of the influence of the added noise.
+            
+        Returns:
+            action (np.array): Selected action. """
         state = torch.from_numpy(state).float().to(device)
         self.actor_local.eval()
         with torch.no_grad():
@@ -102,10 +123,10 @@ class DdpgAgent(object):
         self.actor_local.train()
         if add_noise:
             action += noise_factor * self.noise.sample()
-        # return np.clip(action, -1, 1)
         return action
 
     def reset(self):
+        """ Restart the seed of the noise. """
         self.noise.reset()
 
     def learn(self, experiences, gamma):
@@ -114,10 +135,10 @@ class DdpgAgent(object):
         where:
             actor_target(state) -> action
             critic_target(state, action) -> Q-value
-        Params
-        ======
-            experiences (Tuple[torch.Tensor]): tuple of (s, a, r, s', done) tuples
-            gamma (float): discount factor
+        
+        Args:
+            experiences (Tuple[torch.Tensor]): Tuple of (s, a, r, s', done) tuples.
+            gamma (float): Discount factor.
         """
         states, actions, rewards, next_states, dones = experiences
 
@@ -153,11 +174,11 @@ class DdpgAgent(object):
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
-        Params
-        ======
-            local_model: PyTorch model (weights will be copied from)
-            target_model: PyTorch model (weights will be copied to)
-            tau (float): interpolation parameter
+        
+        Args:
+            local_model: PyTorch model (weights will be copied from).
+            target_model: PyTorch model (weights will be copied to).
+            tau (float): Interpolation parameter.
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau * local_param.data + (1.0 - tau) * target_param.data)

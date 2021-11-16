@@ -31,15 +31,17 @@ print("Selected device: ", device)
 
 
 class DQNAgent(object):
-    """Interacts with and learns from the environment."""
+    """RL agent of Deep Q-Network type."""
 
     def __init__(self, config, log_path, state_size, action_size, random_seed):
-        """Initialize an Agent object.
-        Params
-        ======
-            state_size (int): dimension of each state
-            action_size (int): dimension of each action
-            random_seed (int): random seed
+        """Initialize agent paramenters, models, and memory.
+
+        Args:
+            config (dict): configuration of parameters and model structure.
+            log_path (string): Path on disk to store gathered information about the experience.
+            state_size (int): Dimension of each state.
+            action_size (int): Dimension of each action.
+            random_seed (int): Random seed.
         """
         self.config = config
         self.log_path = log_path
@@ -67,12 +69,23 @@ class DQNAgent(object):
         self.memory = PrioritizedReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed, PRIORITIZED_ER_a)
 
     def copy_weights(self, source, target):
-        """Copies the weights from the source to the target"""
+        """Copies the weights from the source to the target.
+        
+        Args:
+            source (NnModel): model where the weights are copied from. 
+            target (NnModel): model where the weights are copied to. """
         for target_param, source_param in zip(target.parameters(), source.parameters()):
             target_param.data.copy_(source_param.data)
 
     def step(self, state, action, reward, next_state, done):
-        """Save experience in replay memory, and use random sample from buffer to learn."""
+        """Save experience in replay memory, and use random sample from buffer to learn.
+        
+        Args:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         # Save experience in replay memory
         td = self.td(state, action, reward, next_state, done) + PRIORITIZED_ER_e
         self.memory.add(state, action, reward, next_state, done, td)
@@ -87,11 +100,12 @@ class DQNAgent(object):
 
     def act(self, state):
         """Returns actions for given state as per current policy.
-        Params
-        ======
-            state (array_like): current state
-            eps (float): epsilon, for epsilon-greedy action selection
-        """
+        
+        Args:
+            state (np.array): Current observation from the Environment.
+
+        Returns:
+            action (np.array): Selected action. """
         state = torch.from_numpy(state).float().to(device)
         self.qnetwork_local.eval()
         with torch.no_grad():
@@ -107,18 +121,18 @@ class DQNAgent(object):
             return np.array([[random.choice(np.arange(self.action_size))]])
 
     def reset(self):
+        """ Restart the seed of the noise. """
         self.noise.reset()
 
     def learn(self, experiences, gamma):
         """Update value parameters using given batch of experience tuples.
-        Params
-        ======
+        
+        Args:
             experiences (Tuple[torch.Variable]): tuple of (s, a, r, s', done) tuples 
-            gamma (float): discount factor
+            gamma (float): Discount factor.
         """
         states, actions, rewards, next_states, dones, probs = experiences
 
-        ## TODO: compute and minimize the loss
         # Double DQN
         input = {"state" : next_states}
         local_argmax_actions = self.qnetwork_local(input).detach().argmax(dim=1).unsqueeze(1)
@@ -144,6 +158,14 @@ class DQNAgent(object):
         self.soft_update(self.qnetwork_local, self.qnetwork_target, TAU)
 
     def td(self, state, action, reward, next_state, done):
+        """ Temporal Difference error. 
+        
+        Args:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         with torch.no_grad():
             # inputs = {"state" : torch.Tensor(state)}
             # action_values = self.qnetwork_local(inputs)
@@ -166,11 +188,11 @@ class DQNAgent(object):
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.
         θ_target = τ*θ_local + (1 - τ)*θ_target
-        Params
-        ======
-            local_model (PyTorch model): weights will be copied from
-            target_model (PyTorch model): weights will be copied to
-            tau (float): interpolation parameter 
+        
+        Args:
+            local_model: PyTorch model (weights will be copied from).
+            target_model: PyTorch model (weights will be copied to).
+            tau (float): Interpolation parameter.
         """
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0-tau)*target_param.data)

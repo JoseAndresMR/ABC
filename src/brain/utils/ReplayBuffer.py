@@ -8,11 +8,12 @@ class ReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
     def __init__(self, action_size, buffer_size, batch_size, seed):
-        """Initialize a ReplayBuffer object.
-        Params
-        ======
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
+        """Initialize the parameters.
+
+        Args:
+            action_size (int): Dimension of the actions.
+            buffer_size (int): Maximum size of buffer.
+            batch_size (int): Size of each training batch.
         """
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  # internal memory (deque)
@@ -23,12 +24,24 @@ class ReplayBuffer:
 
 
     def add(self, state, action, reward, next_state, done):
-        """Add a new experience to memory."""
+        """Add a new experience to memory.
+        Args:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         e = copy.deepcopy(self.experience(state, action, reward, next_state, done))
         self.memory.append(e)
 
     def sample(self):
-        """Randomly sample a batch of experiences from memory."""
+        """Randomly sample a batch of experiences from memory.
+        Returns:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         experiences = random.sample(self.memory, k=self.batch_size)
 
         states = torch.from_numpy(np.vstack([e.state for e in experiences if e is not None])).float().to(self.device)

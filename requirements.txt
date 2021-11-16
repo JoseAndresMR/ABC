@@ -1,0 +1,8 @@
+unityagents
+numpy
+torch
+seaborn
+torchvision
+gym
+gym[atari]
+box2d-py

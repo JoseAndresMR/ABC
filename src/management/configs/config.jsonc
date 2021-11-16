@@ -10,6 +10,6 @@
         {"envs": "config_2", "schedule" :  "config_3"},
         {"brain": "config_2"}
     ],
-    "ID" : "test_experience",
+    "ID" : "biwalker_tests",
     "iterations" : {}
 }

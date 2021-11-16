@@ -9,13 +9,12 @@ class PrioritizedReplayBuffer:
     """Fixed-size buffer to store experience tuples."""
 
     def __init__(self, action_size, buffer_size, batch_size, seed, PRIORITIZED_ER_a):
-        """Initialize a ReplayBuffer object.
-        Params
-        ======
-            action_size (int): dimension of each action
-            buffer_size (int): maximum size of buffer
-            batch_size (int): size of each training batch
-            seed (int): random seed
+        """Initialize the parameters.
+
+        Args:
+            action_size (int): Dimension of the actions.
+            buffer_size (int): Maximum size of buffer.
+            batch_size (int): Size of each training batch.
         """
         self.action_size = action_size
         self.memory = deque(maxlen=buffer_size)  
@@ -25,12 +24,24 @@ class PrioritizedReplayBuffer:
         self.PRIORITIZED_ER_a = PRIORITIZED_ER_a
     
     def add(self, state, action, reward, next_state, done, td):
-        """Add a new experience to memory."""
+        """Add a new experience to memory.
+        Args:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         e = self.experience(state, action, reward, next_state, done, td)
         self.memory.append(e)
     
     def sample(self):
-        """Randomly sample a batch of experiences from memory."""
+        """Randomly sample a batch of experiences from memory.
+        Returns:
+            states (np.array): Current observations on the environment.
+            actions (np.array): Action already selected by the agent given State.
+            rewards (np.array): Reward received from the Environment when taken the action.
+            next_states (np.array): Next observations on the environment.
+            dones (list of bools): Wether episode has finished in this step or not. """
         probs = np.array([abs(e.td) for e in self.memory if e is not None], dtype=np.float)
         probs = probs**self.PRIORITIZED_ER_a / sum(probs**self.PRIORITIZED_ER_a)
         #probs = np.ones(len(self.memory))/len(self.memory)

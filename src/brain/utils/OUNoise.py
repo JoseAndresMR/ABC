@@ -6,7 +6,14 @@ class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
     def __init__(self, size, seed, mu=0., theta=0.15, sigma=0.2):
-        """Initialize parameters and noise process."""
+        """Initialize parameters and noise process.
+        
+        Args:
+            size (int): Size of the noised output. 
+            seed (int): Start poinf for the random initialisation.
+            mu (float): Mean.
+            theta (float):
+            sigma (float): Variance. """
         self.mu = mu * np.ones(size)
         self.theta = theta
         self.sigma = sigma

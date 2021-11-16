@@ -109,7 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-venv_drlnd_continuous_control
+venv_abc
 
 # Spyder project settings
 .spyderproject

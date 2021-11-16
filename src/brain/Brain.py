@@ -15,8 +15,31 @@ from brain.Neuron import Neuron
 from brain.AttentionField import AttentionField
 
 class Brain(object):
-
+    """ Creation, interconnection and management of neurons. """
+    
     def __init__(self, config, log_path):
+        """ Initialization of neurons, attention field, and data management. 
+
+        Args:
+            config (dict): Configuration of the brain. Contents of each env:
+                - neurons (dict): define how each neuron is
+                    - type (dict): type of neurons to be defined
+                        - neurons (list): Not for intern neurons. Definition of each neurons
+                            - agent (dict): agent that defines the neuron
+                                - type (string): type of RL agent
+                                - additional_dim (list/int): input or output dim, or both depending on type.
+                                - models (dict): neural network model in the predefined models
+                                    - actor (string)
+                                    - critic (string)
+                        - quantity (dict): Just for intern neurons.
+                            - quantity (int): number of these neurons, all equal.
+                            - Same definition as above
+                - attention_field (dict): 
+                    - key_dim (int): keys and queries length
+                    - value_dim (int): value length
+                    - reward_backprop_thr (int): minimum reward to stop its backpropagation
+            log_path (string): Path on disk to store gathered information about the experience
+        """
 
         self.neurons = {"all": [], "sensory-motor" : [], "sensory" : [], "intern" : [], "motor" : []}
         self.config = config
@@ -27,12 +50,11 @@ class Brain(object):
         self.forward_step = 0
         self.tensorboard_writer = SummaryWriter(self.log_path)
 
-        # self.fig = plt.figure()
-        # self.ax = self.fig.add_subplot(111)
         self.scores_deque = deque(maxlen=1000)
         self.scores = []
 
-    def spawnNeurons(self): ### SIMPLIFY FUNCTION
+    def spawnNeurons(self):
+        """ Batch initialisation of all kinds of neurons. TODO: dynamically spawn during the development of the experience. """
         print("Brain: Spawning neurons")
         for neuron_type, type_neuron_config in self.config["neurons"].items():
             if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
@@ -48,6 +70,7 @@ class Brain(object):
                     self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
 
     def spawnOneNeuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
+        """ Creation of a neuron and its inclussion in the management objects. """
         empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
         neuron = deepcopy(empty_neuron)
         neuron["neuron"] = Neuron(neuron_type, config, self.log_path, k_dim, v_dim, additional_dim)
@@ -56,7 +79,11 @@ class Brain(object):
         self.neurons[neuron_type].append(neuron)
 
     def forward(self):
-        # print("Brain: forward step {}".format(self.forward_step))
+        """ Composed and structured learning from prior steps and forward propagation of current step.
+        The logical sequence follows sensory, intern, motor and sensory-motor agents.
+        All of them follow a first learning from pior steps, later propagation of current step.
+        First attention us run sensory -> intern and later (sensory, intern) -> motor. """
+
         if self.forward_step > 0:
             [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
         [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
@@ -77,6 +104,9 @@ class Brain(object):
             self.makePlots()
 
     def runAttentionFieldStep(self, stage):
+        """ Compute attention weights in two possible stages.
+        First attention us run sensory -> intern and later (sensory, intern) -> motor. """
+
         if stage == 1 or stage == 2:
             for neuron in self.neurons["sensory"]:
                 self.attention_field.addEntries(None, neuron["neuron"].key, neuron["neuron"].output_value)
@@ -104,6 +134,8 @@ class Brain(object):
             neurons[i]["neuron"].attended = attended[i]
 
     def setStateAndReward(self):
+        """ Transports the state and reward information from the information object in this class to inside each neurons' class
+        and to the overall performace storage. """
         [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
         [self.allocateReward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory"]]
@@ -117,6 +149,7 @@ class Brain(object):
             neuron["reward"] = []
 
     def allocateReward(self, reward, attendeds):
+        """ Split or backpropagate the reward given the attention weights each agent used to definde its state. """
         split_rewards = np.array(attendeds)*reward
         neurons = self.neurons["sensory"] + self.neurons["intern"]
         
@@ -130,7 +163,13 @@ class Brain(object):
                     self.allocateReward(split_reward, neurons[i]["neuron"].attended)
 
     def makePlots(self):
-        ### Attention heatmap
+        """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
+
+        ### Reward scalar
+        self.tensorboard_writer.add_scalar('avg_score',
+                                        np.mean(self.scores_deque),
+                                        self.forward_step)
+        ### Attention heatmap. TODO: to tensorboard
         # fig, ax = plt.subplots()
         # df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
         #                     index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
@@ -146,18 +185,7 @@ class Brain(object):
         # plt.title("Brain: Full Attention field")
         # plt.savefig('Attention.png')
 
-        ### Reward
-        # fig, ax = plt.subplots()
-        # plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-        # plt.title("Brain: Reward")
-        # plt.ylabel('Score')
-        # plt.xlabel('Step #')
-        self.tensorboard_writer.add_scalar('avg_score',
-                                        np.mean(self.scores_deque),
-                                        self.forward_step)
-        # plt.show()
-
-        ### 3D Attention Field
+        ### 3D Attention Field. TODO: to tensorboard
         # plt.rcParams["legend.fontsize"] = 10
         # fig = plt.figure()
         # ax = fig.gca(projection="3d")

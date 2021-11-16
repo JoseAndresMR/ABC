@@ -9,20 +9,21 @@ import torch.nn.functional as F
 
 
 def hidden_init(layer):
-    # for initializing the hidden layer weights with random noise
+    """ Initialize the hidden layer weights with random noise. """
     fan_in = layer.weight.data.size()[0]
     lim = 1. / np.sqrt(fan_in)
     return -lim, lim
 
 class NnModel(nn.Module):
     def __init__(self, config, inputs_size, seed):
-        """Initialize parameters and build model.
-        Params
-        ======
-            state_size (int): Dimension of each state
-            action_size (int): Dimension of each action
-            seed (int): Random seed
-        """
+        """Initialize parameters and build model. Initialize the torch functions contained in the defintion.
+        
+        Args:
+            config (dict): model definiton.
+            inputs_size (dict): Contains the sizes of input and output.
+                state_size (int): Dimension of each state.
+                action_size (int): Dimension of each action.
+            seed (int): Random seed. """
         super(NnModel, self).__init__()
         self.config = config
         self.seed = torch.manual_seed(seed)
@@ -82,15 +83,18 @@ class NnModel(nn.Module):
         self.reset_parameters()
 
     def reset_parameters(self):
+        """ Randomly itinialize the weights of the linear layers. """
         for i, layer_config in enumerate(self.config["layers"]):
             if layer_config["type"] == "linear":
                 self.layers[i].weight.data.uniform_(*hidden_init(self.layers[i]))
 
-            # self.fc3.weight.data.uniform_(-3e-3, 3e-3)  #### How to implement this?
-
     def forward(self, inputs):
-        # inputs = {"state" : state, "action" : action}
-        # x = self.bn1(inputs["state"])
+        """ Process all the sequential operations that define the current model.
+        There can be concatenations after the main operations of each layer.
+        There can be auxiliar operations after the main operation.
+        
+        Args:
+            inputs (dict): Current state and action. """
         x = inputs["state"]
         for i, layer_config in enumerate(self.config["layers"]):
             ## Prior concatenations

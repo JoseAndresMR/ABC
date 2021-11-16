@@ -5,10 +5,19 @@ import matplotlib.pyplot as plt
 from environments.Environment import Environment
 
 class UnityEpisodicEnvironment(Environment):
+    """ OpenAI Unity, episodic environment. """
+    
     def __init__(self, file_path, id, log_path):
         super().__init__(id, log_path)
-        # self.file_path = os.path.join(os.path.dirname(__file__), "..","..","bin",file_path)
-        self.env = UnityEnvironment(file_name=file_path, no_graphics=True)
+        """ Creates the Unity environment. Gathers Unity specific information structure and presents it as a common ABC frame.
+
+        Args:
+            file_path (string): path to the binary in memory of disk.
+            id (string): unique identification in the whole experience.
+            log_path (string): Path on disk to store gathered information about the experience  
+        """
+
+        self.env = UnityEnvironment(file_name= file_path, no_graphics=True)
         self.brain_name = self.env.brain_names[0]
         brain = self.env.brains[self.brain_name]
         env_info = self.env.reset(train_mode=True)[self.brain_name]
@@ -18,10 +27,18 @@ class UnityEpisodicEnvironment(Environment):
         state_size = states.shape[1]
         action_type = brain.vector_action_space_type
         self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
-        # self.fig = plt.figure()
-        # self.ax = self.fig.add_subplot(111)
 
     def startEpisodes(self, n_episodes=10000, max_t=3000, success_avg = 30, print_every=3):
+        """
+        Start a new stack of episodes.
+        
+        Args:
+            n_episodes (int): max number of episodes before the stack finishes.
+            max_t (int): max number of timesteps befor the stack finishes.
+            success_avg (int): boundary that determines when the performance is good enough and the stack finishes.
+            print_every (int): number of episodes skipped before the log is updated.
+        """
+
         self.n_episodes, self.max_t, self.print_every, self.success_avg = n_episodes, max_t, print_every, success_avg
         self.current_episode, self.current_t = 0, 0
 
@@ -33,6 +50,16 @@ class UnityEpisodicEnvironment(Environment):
         return self.states
 
     def step(self):
+        """ Apply the chosen actions in the enviornemnt, then receive the reward and next observations.
+        When the episode finishes, check if the performance is good enough and if log is required.
+        
+        Returns:
+            rewards (list of ints): Used to measure the performance and hence learning.
+            next_states (list np.arrays): Next observation of the agent.
+            dones (list of bools): Wether the current episode is already finished or not.
+            env_finished (list of bools): Wehter the environment is solved or max episodes reached. 
+        """
+
         episode_finished = False
         if self.current_t < self.max_t:
             # if self.env_info["action_type"] == "discrete":
@@ -63,16 +90,6 @@ class UnityEpisodicEnvironment(Environment):
                 env_finished = True
             if self.current_episode % self.print_every == 0:
                 print('\rEpisode {}\tAverage Score: {:.2f}'.format(self.current_episode, np.mean(self.scores_deque)))
-                # plt.figure()
-                # plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-                # plt.title("Ennvironment: score")
-                # plt.ylabel('Score')
-                # plt.xlabel('Episode #')
-                # plt.draw()
-                # plt.ioff()
-                # plt.show()
-                # self.fig.show()
-                # self.f_d.set_data(np.arange(1, len(self.scores)+1), self.scores)
                 self.tensorboard_writer.add_scalar('scores',
                                                 self.scores_deque[-1],
                                                 self.current_episode)
@@ -83,10 +100,5 @@ class UnityEpisodicEnvironment(Environment):
         return (rewards, next_states, dones, env_finished)
 
     def finishEnvironment(self):
+        """ Close the environment to free memory and computation. """
         self.env.close()  # close the environment as it is no longer needed
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        plt.plot(np.arange(1, len(self.scores)+1), self.scores)
-        plt.ylabel('Score')
-        plt.xlabel('Episode #')
-        plt.show()
