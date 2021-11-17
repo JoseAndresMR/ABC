@@ -45,7 +45,7 @@ class Brain(object):
         self.config = config
         self.log_path = os.path.join(log_path,"brain")
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
-        self.attention_field = AttentionField(self.k_dim, self.v_dim, self.config["attention_field"]["reward_backprop_thr"])
+        self.attention_field = AttentionField(self.k_dim, self.v_dim)
         self.spawnNeurons()
         self.forward_step = 0
         self.tensorboard_writer = SummaryWriter(self.log_path)
@@ -154,7 +154,7 @@ class Brain(object):
         neurons = self.neurons["sensory"] + self.neurons["intern"]
         
         for i, split_reward in enumerate(split_rewards):
-            if abs(split_reward) > 0.01:
+            if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"]:
                 if neurons[i]["reward"] == []:
                     neurons[i]["reward"] = split_reward
                 else:
