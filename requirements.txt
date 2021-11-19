@@ -1,8 +1,9 @@
-unityagents
 numpy
 torch
 seaborn
 torchvision
 gym
 gym[atari]
+pyglet
 box2d-py
+mlagents_envs

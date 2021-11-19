@@ -5,18 +5,14 @@ import shutil
 
 from Experience import Experience
 
-"""
-fjgnlskdfjgnlskfdjgn
-"""
-
 class Testbench(object):
     """
-    sifuhgsifduhgsidfuhg
+    Class to run batches of experiments following different settings.
     """
 
     def __init__(self):
         """
-        sfgksfdgnksdfg
+        Define initial configurations.
         """
 
         with open(os.path.join(os.path.dirname(__file__),"configs",'config.jsonc'), 'r') as j:
@@ -33,9 +29,9 @@ class Testbench(object):
             self.base_config["schedule"] = json.load(j)
 
         self.log_path = os.path.join(os.path.dirname(__file__),'..','..',"data/runs", self.config["ID"])
-        self.experiences()
 
     def experiences(self):
+        """ Run all experiments in sequence, changing the alterations from the prior base configuration. """
         i = 0
         for alteration in self.config["alterations"]:
             current_log_path = os.path.join(self.log_path, str(i))
@@ -53,4 +49,5 @@ class Testbench(object):
             exp.loop()
             i += 1
 
-Testbench()
+tb = Testbench()
+tb.experiences()

@@ -5,10 +5,11 @@
                 {
                     "agent" : {
                         "type" : "DDPG",
-                        "additional_dim" : [33,4],
+                        "additional_dim" : [3,1],
+                        "definition" : "ddpg_1",
                         "models": {
-                            "actor" : "actor_extended",
-                            "critic" : "critic_extended"
+                            "actor" : "actor1",
+                            "critic" : "critic1"
                         }
                     }
                 }

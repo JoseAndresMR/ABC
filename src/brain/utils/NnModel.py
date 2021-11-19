@@ -28,8 +28,8 @@ class NnModel(nn.Module):
         self.config = config
         self.seed = torch.manual_seed(seed)
         if type(self.config) == str:
-            with open(os.path.join(os.path.dirname(__file__),"..", "configs",'predefined_models.json'), 'r') as j:
-                self.config = json.load(j)[self.config]
+            with open(os.path.join(os.path.dirname(__file__),"..", "rl_agents",'predefined_models','{}.json'.format(self.config)), 'r') as j:
+                self.config = json.load(j)
 
         self.layers = nn.ModuleList()
         for i, layer_config in enumerate(self.config["layers"]):
@@ -117,6 +117,8 @@ class NnModel(nn.Module):
                         x = x.squeeze(1)  ### TODO: enter as feature parameter
                     elif feature == "leaky_relu":
                         x = F.leaky_relu(x)
+                    elif feature == "relu":
+                        x = F.relu(x)
                     elif feature == "tanh":
                         x = torch.tanh(x)
                     elif feature == "sigmoid":

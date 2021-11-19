@@ -37,6 +37,8 @@ class Experience(object):
         try:
             self.meta_environment.startEnvironmentsEpisodes() ### TODO: dynamically start environments on env schedule
             for spin in range(999999999999):
+                if spin == 10000:
+                    debug_flag = True
                 self.allocateEnvironementOutput()
                 self.brain.forward()
                 self.allocateBrainOutput()

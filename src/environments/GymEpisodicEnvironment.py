@@ -30,6 +30,10 @@ class GymEpisodicEnvironment(Environment):
             action_size = self.env.action_space.shape
         elif action_type == gym.spaces.discrete.Discrete:
             action_size = self.env.action_space.n
+
+        print("Environment: Starting Gym Environment called {}".format(name))
+        print("Environment: State type: {}. State size: {}".format(state_type, state_size))
+        print("Environment: State type: {}. State size: {}".format(action_type, action_size))
         
         self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
 
@@ -69,6 +73,8 @@ class GymEpisodicEnvironment(Environment):
             if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
                 self.actions = np.argmax(self.actions)
             observation, reward, done, info = self.env.step(self.actions[0])
+            if self.current_episode >= 1000:
+                self.env.render()
             self.states = np.array([observation])
             self.e_scores += [reward]
             self.current_t += 1
