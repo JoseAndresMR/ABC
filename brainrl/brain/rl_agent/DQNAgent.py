@@ -6,8 +6,8 @@ import copy
 from collections import namedtuple, deque
 from copy import deepcopy
 
-from brain.utils.NnModel import NnModel
-from brain.utils.PrioritizedReplayBuffer import PrioritizedReplayBuffer
+from brainrl.brain.util.NnModel import NnModel
+from brainrl.brain.util.PrioritizedReplayBuffer import PrioritizedReplayBuffer
 
 import torch
 import torch.nn.functional as F

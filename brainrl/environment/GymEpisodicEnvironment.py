@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from collections import deque
 import matplotlib.pyplot as plt
-from environments.Environment import Environment
+from .Environment import Environment
 
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """

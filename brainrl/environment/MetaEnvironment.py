@@ -1,7 +1,7 @@
 import json, os
 
-from environments.UnityEpisodicEnvironment import UnityEpisodicEnvironment
-from environments.GymEpisodicEnvironment import GymEpisodicEnvironment
+from .UnityEpisodicEnvironment import UnityEpisodicEnvironment
+from .GymEpisodicEnvironment import GymEpisodicEnvironment
 from copy import deepcopy
 
 class MetaEnvironment(object):

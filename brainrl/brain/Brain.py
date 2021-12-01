@@ -11,8 +11,8 @@ from mpl_toolkits.mplot3d import axes3d
 import copy
 from torch.utils.tensorboard import SummaryWriter
 
-from brain.Neuron import Neuron
-from brain.AttentionField import AttentionField
+from .Neuron import Neuron
+from .AttentionField import AttentionField
 
 class Brain(object):
     """ Creation, interconnection and management of neurons. """
