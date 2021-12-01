@@ -5,9 +5,9 @@
         "play_ID": 2,
         "start_type": "step",
         "start_value": 0,
-        "max_episodes": 1050,
+        "max_episodes": 600,
         "max_t": 3000,
-        "success_avg": 30,
+        "success_avg": -300,
         "signals_map": {
             "state": [
                 {

@@ -1,7 +1,6 @@
 """
 One timeline exposition of a brain to different environments following a schedule
 """
-import sys,json, os
 import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 import numpy as np
@@ -34,19 +33,24 @@ class Experience(object):
         It learns from prior experiences and decides new actions, whick are transferred to the metaenvironment.
         """
         print("Experience: Starting loop")
+        metaenv_finished = False
         try:
             self.meta_environment.startEnvironmentsEpisodes() ### TODO: dynamically start environments on env schedule
             for spin in range(999999999999):
                 if spin == 10000:
                     debug_flag = True
                 self.allocateEnvironementOutput()
+                metaenv_finished = self.meta_environment.closeEnvironments()
+                if metaenv_finished:
+                    break
                 self.brain.forward()
                 self.allocateBrainOutput()
                 self.meta_environment.runSteps()
-                self.meta_environment.closeEnvironments()
         except AssertionError as error:
             print(error)
             self.meta_environment.closeEnvironments()
+
+        return spin
 
     def allocateEnvironementOutput(self):
         """
@@ -83,6 +87,11 @@ class Experience(object):
                                                                                             env_input,
                                                                                             self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
         self.meta_environment.setAction()
+
+    def finish(self):
+        del self.meta_environment
+        del self.brain
+        del self.config
 
 def addMatrixToTarget(target_matrix, target_dim, added_matrix):
     """ Adds a matrix in the desired cooredinates of a bigger matrix

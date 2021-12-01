@@ -1,6 +1,5 @@
 import numpy as np
 from copy import deepcopy
-import json
 import os
 import seaborn as sns; sns.set_theme()
 import matplotlib.pyplot as plt
@@ -52,6 +51,7 @@ class Brain(object):
 
         self.scores_deque = deque(maxlen=1000)
         self.scores = []
+        self.performance = -99999
 
     def spawnNeurons(self):
         """ Batch initialisation of all kinds of neurons. TODO: dynamically spawn during the development of the experience. """
@@ -142,8 +142,9 @@ class Brain(object):
         [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["intern"]]
         [neuron["neuron"].setReward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         
-        self.scores_deque.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["motor"]]).sum())
-        self.scores.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["motor"]]).sum())
+        self.scores_deque.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        self.scores.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        self.performance = np.mean(self.scores_deque)
 
         for neuron in self.neurons["all"]:
             neuron["reward"] = []
@@ -161,6 +162,9 @@ class Brain(object):
                     neurons[i]["reward"] += split_reward
                 if neurons[i]["neuron"].neuron_type != "sensory":
                     self.allocateReward(split_reward, neurons[i]["neuron"].attended)
+
+    def getPerformance(self):
+        return self.performance
 
     def makePlots(self):
         """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """

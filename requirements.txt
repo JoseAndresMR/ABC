@@ -7,3 +7,4 @@ gym[atari]
 pyglet
 box2d-py
 mlagents_envs
+optuna

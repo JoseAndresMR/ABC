@@ -27,9 +27,6 @@ class NnModel(nn.Module):
         super(NnModel, self).__init__()
         self.config = config
         self.seed = torch.manual_seed(seed)
-        if type(self.config) == str:
-            with open(os.path.join(os.path.dirname(__file__),"..", "rl_agents",'predefined_models','{}.json'.format(self.config)), 'r') as j:
-                self.config = json.load(j)
 
         self.layers = nn.ModuleList()
         for i, layer_config in enumerate(self.config["layers"]):

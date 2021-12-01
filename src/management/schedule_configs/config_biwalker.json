@@ -7,7 +7,7 @@
         "start_value": 0,
         "max_episodes": 2000,
         "max_t": 3000,
-        "success_avg": 300,
+        "success_avg": 100,
         "signals_map": {
             "state": [
                 {

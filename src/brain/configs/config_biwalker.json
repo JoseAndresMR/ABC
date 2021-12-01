@@ -6,10 +6,10 @@
                     "agent" : {
                         "type" : "DDPG",
                         "additional_dim" : [24,4],
-                        "definition" : "ddpg_1",
+                        "definition" : "predefined_agents/ddpg_1.json",
                         "models": {
-                            "actor" : "actor_udacity",
-                            "critic" : "critic_udacity"
+                            "actor" : "predefined_models/actor_udacity.json",
+                            "critic" : "predefined_models/critic_udacity.json"
                         }
                     }
                 }

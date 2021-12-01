@@ -32,8 +32,7 @@ class DdpgAgent(object):
             random_seed (int): Random seed.
         """
         self.config = config
-        with open(os.path.join(os.path.dirname(__file__),'predefined_agents','{}.json'.format(self.config["definition"])), 'r') as j:
-            self.metaparams = json.load(j)["metaparameters"]
+        self.metaparams = self.config["definition"]["metaparameters"]
         self.log_path = log_path
         self.state_size = state_size
         self.action_size = action_size
