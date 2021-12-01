@@ -133,3 +133,6 @@ dmypy.json
 bin/environments/
 data/
 runs/
+
+# Neurons
+neurons/
