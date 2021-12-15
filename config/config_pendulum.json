@@ -1,0 +1,25 @@
+{
+    "neurons" : {
+        "sensory-motor" : {
+            "neurons" : [
+                {
+                    "agent" : {
+                        "type" : "DDPG",
+                        "additional_dim" : [3,1],
+                        "definition" : "predefined_agents/ddpg_1.json",
+                        "models": {
+                            "actor" : "predefined_models/actor_udacity.json",
+                            "critic" : "predefined_models/critic_udacity.json"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "attention_field":
+        {
+            "key_dim" : 3,
+            "value_dim" : 10,
+            "reward_backprop_thr" : 0.01
+        }
+}
