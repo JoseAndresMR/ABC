@@ -11,10 +11,9 @@ RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
 
 # Install Python 3.7
 RUN apt-get -y update && apt-get -y install \
-    python3.7
-RUN apt-get -y update && apt-get -y install \
-    python3-pip
-    #ipython3
+    python3.7 \
+    python3-pip \
+    ipython3
 RUN apt-get -y update && apt-get -y install swig
 
 # RUN python3.7 -m pip install -U pip && python3.7 -m pip install numpy==1.18.5 \
@@ -144,8 +143,8 @@ RUN python3.7 -m pip install -U pip && python3.7 -m pip install \
     terminado==0.12.1 \
     testpath==0.5.0 \
     toml==0.10.2 \
-    torch==1.10.0 \
-    torchvision==0.11.1 \
+    # torch==1.10.0 \
+    # torchvision==0.11.1 \
     tornado==6.1 \
     tqdm==4.62.3 \
     traitlets==5.1.1 \
@@ -157,6 +156,13 @@ RUN python3.7 -m pip install -U pip && python3.7 -m pip install \
     widgetsnbextension==3.5.2 \
     wrapt==1.13.3 \
     zipp==3.6.0
+
+# # Install Torch with CUDA. Tensorflow apparently was not needed
+# RUN pip3 install tensorflow==2.0.0
+RUN python3.7 -m pip install -U pip && python3.7 -m \
+    pip install torch==1.10.0+cu113 torchvision==0.11.1+cu113 \
+    torchaudio==0.10.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+
 
 # Install library
 ADD . /repo/
