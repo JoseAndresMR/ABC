@@ -1,13 +1,13 @@
-FROM nvidia/cuda:11.4.1-base-ubuntu18.04
+FROM nvidia/cuda:11.0-base-ubuntu18.04
 
 # Environments
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-# CMD nvidia-smi
+CMD nvidia-smi
 
-# # Install linux CUDA 11.0
-RUN apt-get update -y && apt-get install -y cuda-nvcc-11-4
+# Install linux CUDA 11.0
+RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
 
 # Install Python 3.7
 RUN apt-get -y update && apt-get -y install \
