@@ -11,7 +11,7 @@ from mpl_toolkits.mplot3d import axes3d
 import copy
 from torch.utils.tensorboard import SummaryWriter
 
-from .Neuron import Neuron
+from .neuron import Neuron
 from .AttentionField import AttentionField
 
 class Brain(object):

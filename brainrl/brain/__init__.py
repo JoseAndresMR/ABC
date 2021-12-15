@@ -1,2 +1,2 @@
-from .Brain import Brain
-from .Neuron import Neuron
+from .brain import Brain
+from .neuron import Neuron

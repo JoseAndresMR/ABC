@@ -49,9 +49,9 @@ class Neuron(object):
         self.log_every = 5000
         self.no_reward_penalty = 0
 
-        self.buildRlAgent()
+        self.build_rl_agent()
 
-    def buildRlAgent(self):
+    def build_rl_agent(self):
         """Define state, action, key, query and value sizes depeding on neuron type.
         Create the object of the RL agent. """
 
@@ -86,23 +86,25 @@ class Neuron(object):
         if self.config["agent"]["type"] == "DDPG":
             self.rl_agent = DdpgAgent(
                 self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed=2)
-        if self.config["agent"]["type"] == "DQN":
+        elif self.config["agent"]["type"] == "DQN":
             self.rl_agent = DQNAgent(
                 self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed=2)
+        else:
+            raise ValueError('neuron_type must be DDPG or DQN')
 
-    def setNextInputValue(self, state):
+    def set_next_input_value(self, state: np.array):
         """ Receive next state from the Brain.
 
         Args:
             state (np.array): Observations taken by the agent on the Environment. """
 
         self.step += 1
-        if type(self.state) != type(np.array(1)):
+        if not isinstance(self.state, np.ndarray):
             self.state = copy.deepcopy(state)
         else:
             self.next_state = copy.deepcopy(state)
 
-    def setReward(self, reward):
+    def set_reward(self, reward: int):
         """ Receive reward from the Brain
 
         Args:
@@ -125,7 +127,7 @@ class Neuron(object):
             action (np.array): Selected action. """
 
         self.action = self.rl_agent.act(self.state)
-        self.decomposeAction()
+        self.decompose_action()
         return self.action
 
     def backprop(self):
@@ -140,7 +142,7 @@ class Neuron(object):
         self.state = self.next_state
         self.next_state = None
 
-    def decomposeAction(self):
+    def decompose_action(self):
         """ Split the outcome of the RL agent into the pieces of the attention mechanism. """
 
         if self.neuron_type == "sensory-motor":

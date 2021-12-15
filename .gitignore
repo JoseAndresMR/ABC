@@ -111,6 +111,9 @@ env.bak/
 venv.bak/
 venv_abc
 
+# IDL
+.vscode/
+
 # Spyder project settings
 .spyderproject
 .spyproject
