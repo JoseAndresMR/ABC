@@ -53,7 +53,7 @@ class Brain(object):
         self.scores_deque = deque(maxlen=1000)
         self.scores = []
 
-    def spawnNeurons(self):
+    def spawn_neurons(self):
         """ Batch initialisation of all kinds of neurons. TODO: dynamically spawn during the development of the experience. """
         print("Brain: Spawning neurons")
         for neuron_type, type_neuron_config in self.config["neurons"].items():
@@ -69,7 +69,7 @@ class Brain(object):
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
                     self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
 
-    def spawnOneNeuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
+    def spawn_one_neuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
         """ Creation of a neuron and its inclussion in the management objects. """
         empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
         neuron = deepcopy(empty_neuron)
@@ -103,7 +103,7 @@ class Brain(object):
         if self.forward_step % 5000 == 0:
             self.makePlots()
 
-    def runAttentionFieldStep(self, stage):
+    def run_attention_field_step(self, stage):
         """ Compute attention weights in two possible stages.
         First attention us run sensory -> intern and later (sensory, intern) -> motor. """
 
@@ -133,7 +133,7 @@ class Brain(object):
             neurons[i]["neuron"].setNextInputValue(np.array([value]))
             neurons[i]["neuron"].attended = attended[i]
 
-    def setStateAndReward(self):
+    def set_state_and_reward(self):
         """ Transports the state and reward information from the information object in this class to inside each neurons' class
         and to the overall performace storage. """
         [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
@@ -148,7 +148,7 @@ class Brain(object):
         for neuron in self.neurons["all"]:
             neuron["reward"] = []
 
-    def allocateReward(self, reward, attendeds):
+    def allocate_reward(self, reward, attendeds):
         """ Split or backpropagate the reward given the attention weights each agent used to definde its state. """
         split_rewards = np.array(attendeds)*reward
         neurons = self.neurons["sensory"] + self.neurons["intern"]
@@ -162,7 +162,7 @@ class Brain(object):
                 if neurons[i]["neuron"].neuron_type != "sensory":
                     self.allocateReward(split_reward, neurons[i]["neuron"].attended)
 
-    def makePlots(self):
+    def make_plots(self):
         """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
 
         ### Reward scalar
