@@ -125,7 +125,6 @@ class Neuron(object):
 
         Results:
             action (np.array): Selected action. """
-
         self.action = self.rl_agent.act(self.state)
         self.decompose_action()
         return self.action

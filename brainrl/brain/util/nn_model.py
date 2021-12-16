@@ -121,6 +121,8 @@ class NnModel(nn.Module):
                         x = x.squeeze(1)  ### TODO: enter as feature parameter
                     elif feature == "leaky_relu":
                         x = F.leaky_relu(x)
+                    elif feature == "relu":
+                        x = F.relu(x)
                     elif feature == "tanh":
                         x = torch.tanh(x)
                     elif feature == "sigmoid":

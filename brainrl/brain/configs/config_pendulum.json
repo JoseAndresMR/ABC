@@ -5,7 +5,7 @@
                 {
                     "agent" : {
                         "type" : "DDPG",
-                        "additional_dim" : [24,4],
+                        "additional_dim" : [3,1],
                         "definition" : "predefined_agents/ddpg_1.json",
                         "models": {
                             "actor" : "predefined_models/actor_udacity.json",

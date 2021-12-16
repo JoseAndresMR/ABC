@@ -1,15 +1,38 @@
 {
+    "id": "time",
     "base_configs": {
-        "envs": "config_biwalker",
-        "brain": "config_biwalker",
-        "schedule": "config_biwalker"
+        "envs": "config_pendulum",
+        "brain": "config_pendulum",
+        "schedule": "config_pendulum"
     },
-    "alterations": [
-        {},
-        {"schedule" : "config_2"},
-        {"envs": "config_2", "schedule" :  "config_3"},
-        {"brain": "config_2"}
-    ],
-    "ID" : "biwalker_tests",
-    "iterations" : {}
+    "experiments": [ 
+        {
+            "id": 1,
+            "config_alterations": {
+                "envs": "config_pendulum",
+                "schedule": "config_pendulum"
+            },
+            "type" : "grid_search",
+            "values": [
+                {
+                    "prefix": "prefix_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "metaparameters"],
+                    "values": {
+                        "tau": [
+                            0.01,
+                            0.02
+                        ],
+                        "lr_actor": [
+                            0.002,
+                            0.004
+                        ],
+                        "lr_critic": [
+                            0.002,
+                            0.004
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
 }

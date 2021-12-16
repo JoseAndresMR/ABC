@@ -30,6 +30,10 @@ class GymEpisodicEnvironment(Environment):
             action_size = self.env.action_space.shape
         elif action_type == gym.spaces.discrete.Discrete:
             action_size = self.env.action_space.n
+
+        print("Environment: Starting Gym Environment called {}".format(name))
+        print("Environment: State type: {}. State size: {}".format(state_type, state_size))
+        print("Environment: State type: {}. State size: {}".format(action_type, action_size))
         
         self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
 
@@ -65,10 +69,13 @@ class GymEpisodicEnvironment(Environment):
         """
 
         episode_finished = False
+        env_finished = False
         if self.current_t < self.max_t:
             if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
                 self.actions = np.argmax(self.actions)
             observation, reward, done, info = self.env.step(self.actions[0])
+            if self.current_episode >= 1000:
+                self.env.render()
             self.states = np.array([observation])
             self.e_scores += [reward]
             self.current_t += 1
@@ -87,7 +94,7 @@ class GymEpisodicEnvironment(Environment):
             self.scores_deque.append(avg_score)
             self.scores.append(avg_score)
             print('\rEpisode {:d}\tscore: {:.2f}\taverage score over the last 10 episodes: {:.2f}'.format(self.current_episode, self.scores_deque[-1], np.mean(list(self.scores_deque)[-10:])), end="")
-            if self.current_episode > 100 and np.mean(self.scores_deque) > self.success_avg:
+            if self.current_episode > 10 and np.mean(self.scores_deque) > self.success_avg:
                 print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(self.current_episode-100, np.mean(self.scores_deque)))
                 env_finished = True
             if self.current_episode % self.print_every == 0:
@@ -97,7 +104,7 @@ class GymEpisodicEnvironment(Environment):
                                                 self.current_episode)
             self.e_scores = np.zeros(1)
 
-        env_finished = self.current_episode == self.n_episodes + 1
+        env_finished = env_finished or self.current_episode == self.n_episodes + 1 
         return ([reward], np.array([observation]), [done], env_finished)
 
     def finishEnvironment(self):

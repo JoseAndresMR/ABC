@@ -1,4 +1,4 @@
-from unityagents import UnityEnvironment
+from mlagents_envs.environment import UnityEnvironment
 import numpy as np
 from collections import deque
 import matplotlib.pyplot as plt
@@ -22,11 +22,17 @@ class UnityEpisodicEnvironment(Environment):
         brain = self.env.brains[self.brain_name]
         env_info = self.env.reset(train_mode=True)[self.brain_name]
         self.num_agents = len(env_info.agents)
-        action_size = brain.vector_action_space_size
         states = env_info.vector_observations
         state_size = states.shape[1]
+        state_size = brain.vector_state_space_size
+        state_type = brain.vector_state_space_type
+        action_size = brain.vector_action_space_size
         action_type = brain.vector_action_space_type
-        self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
+
+        print("Environment: Starting Unity Environment called {}".format(id))
+        print("Environment: State type: {}. State size: {}".format(state_type, state_size))
+        print("Environment: State type: {}. State size: {}".format(action_type, action_size))
+        self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "state_type" : state_type, "action_size" : action_size, "action_type" : action_type}
 
     def startEpisodes(self, n_episodes=10000, max_t=3000, success_avg = 30, print_every=3):
         """
