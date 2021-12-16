@@ -12,12 +12,12 @@ import copy
 from torch.utils.tensorboard import SummaryWriter
 
 from .neuron import Neuron
-from .AttentionField import AttentionField
+from .attention_field import AttentionField
 
 class Brain(object):
     """ Creation, interconnection and management of neurons. """
     
-    def __init__(self, config, log_path):
+    def __init__(self, config: dict, log_path: str):
         """ Initialization of neurons, attention field, and data management. 
 
         Args:
@@ -46,7 +46,7 @@ class Brain(object):
         self.log_path = os.path.join(log_path,"brain")
         self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
         self.attention_field = AttentionField(self.k_dim, self.v_dim)
-        self.spawnNeurons()
+        self.spawn_neurons()
         self.forward_step = 0
         self.tensorboard_writer = SummaryWriter(self.log_path)
 
@@ -60,14 +60,14 @@ class Brain(object):
             if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
                 for neuron_config in type_neuron_config["neurons"]:
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
+                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
 
             elif neuron_type == "intern":
                 for _ in range(type_neuron_config["quantity"]):
                     neuron_config = copy.deepcopy(type_neuron_config)
                     neuron_config.pop("quantity")
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawnOneNeuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
+                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
 
     def spawn_one_neuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
         """ Creation of a neuron and its inclussion in the management objects. """
@@ -103,28 +103,28 @@ class Brain(object):
         if self.forward_step % 5000 == 0:
             self.makePlots()
 
-    def run_attention_field_step(self, stage):
+    def run_attention_field_step(self, stage: int):
         """ Compute attention weights in two possible stages.
         First attention us run sensory -> intern and later (sensory, intern) -> motor. """
 
         if stage == 1 or stage == 2:
             for neuron in self.neurons["sensory"]:
-                self.attention_field.addEntries(None, neuron["neuron"].key, neuron["neuron"].output_value)
+                self.attention_field.add_entries(None, neuron["neuron"].key, neuron["neuron"].output_value)
         if stage == 1:
             for neuron in self.neurons["intern"]:
-                self.attention_field.addEntries(neuron["neuron"].query,
+                self.attention_field.add_entries(neuron["neuron"].query,
                                                 neuron["neuron"].key,
                                                 neuron["neuron"].output_value)
         elif stage == 2:
             for neuron in self.neurons["intern"]:
-                self.attention_field.addEntries(None,
+                self.attention_field.add_entries(None,
                                                 neuron["neuron"].key,
                                                 neuron["neuron"].output_value)
         if stage == 2:
             for neuron in self.neurons["motor"]:
-                self.attention_field.addEntries(neuron["neuron"].query, None, None)
+                self.attention_field.add_entries(neuron["neuron"].query, None, None)
 
-        values, attended = self.attention_field.runStep()
+        values, attended = self.attention_field.run_step()
         if stage == 1:
             neurons = self.neurons["intern"]
         elif stage == 2:
@@ -229,4 +229,3 @@ class Brain(object):
         # ax.legend()
         # plt.title("Brain: 3D Attention Field")
         # plt.savefig('3D attention field.png')
-        
