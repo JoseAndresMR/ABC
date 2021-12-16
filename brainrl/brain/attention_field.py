@@ -15,9 +15,9 @@ class AttentionField(object):
 
         self.k_dim = k_dim
         self.v_dim = v_dim
-        self.resetEntries()
+        self.reset_entries()
 
-    def addEntries(self, queries, keys, values):
+    def add_entries(self, queries, keys, values):
         """ Define the values of the three components in the attention mechanism. 
         
         Args:
@@ -37,8 +37,7 @@ class AttentionField(object):
             else:
                 print("Attention field: keys or values do not have correct shape. Expected {},{} and got {},{}".format(self.k_dim, self.v_dim, keys.shape[1], values.shape[1]))
 
-
-    def scaledDotProduct(self, q, k, v, mask=None):
+    def scaled_dot_product(self, q, k, v, mask=None):
         """ Math operation required to calculate the allignment of keys and queries.
         
         Args:
@@ -55,20 +54,20 @@ class AttentionField(object):
         self.set_attention = F.softmax(attn_logits, dim=-1)
         self.avg_values = torch.matmul(self.set_attention, v)
         
-    def resetEntries(self):
+    def reset_entries(self):
         """ Clean values. """
 
         self.queries = torch.tensor(np.array([]))
         self.keys = torch.tensor(np.array([]))
         self.values = torch.tensor(np.array([]))
 
-    def runStep(self):
+    def run_step(self):
         """ Calculate the scale dot product and reset attention players.
         
         Returns: 
             avg_values (np.array): Weighted sum of values of attended enurons.
             set_attention (np.array): Attention weights computed for each key neuron. """
 
-        self.scaledDotProduct(self.queries, self.keys, self.values)
-        self.resetEntries()
+        self.scaled_dot_product(self.queries, self.keys, self.values)
+        self.reset_entries()
         return self.avg_values.numpy(), self.set_attention.numpy()
