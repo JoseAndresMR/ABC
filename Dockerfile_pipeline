@@ -1,0 +1,18 @@
+FROM ubuntu:18.04
+
+# Install Python 3.7
+RUN apt-get -y update && apt-get -y install \
+    python3.7 \
+    python3-pip \
+    swig
+
+
+# Install Python libraries with pip
+
+
+# Install library
+ADD . /repo/
+WORKDIR /repo/
+RUN python3.7 -m pip install -r requirements.txt
+RUN python3.7 -m pip install -e .
+CMD ["pytest"]
