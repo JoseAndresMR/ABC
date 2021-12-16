@@ -4,7 +4,7 @@ pipelines:
     '**': #this runs as default for any branch not elsewhere defined
       - step:
           script:
-            - docker build -t abc:1.0 -f Dockerfile .
+            - docker build -t abc:1.0 -f Dockerfile_pipeline .
             - docker run -it -v $(pwd):/repo abc:1.0 pytest
 options:
   docker: true
