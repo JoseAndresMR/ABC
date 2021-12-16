@@ -2,6 +2,7 @@ from brainrl.brain import Neuron
 import numpy as np
 import unittest
 
+
 class TestNeuron(unittest.TestCase):
     @staticmethod
     def get_config():
@@ -77,7 +78,7 @@ class TestNeuron(unittest.TestCase):
                                       v_dim=2,
                                       environment_signal_size=[2, 2])
         neuron_sensory_motor.decompose_action()
-    
+
 
 if __name__ == '__main__':
     unittest.main()
