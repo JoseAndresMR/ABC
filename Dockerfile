@@ -12,14 +12,15 @@ RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
 # Install Python 3.7
 RUN apt-get -y update && apt-get -y install \
     python3.7 \
-    python3-pip
-RUN apt-get -y update && apt-get -y install swig
+    python3-pip \
+    swig
 
 # RUN python3.7 -m pip install -U pip && python3.7 -m pip install numpy==1.18.5 \
 #     box2d-py
 
 # Install Python libraries with pip
-RUN python3.7 -m pip install -U pip && python3.7 -m pip install \
+RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
+    pip install --no-cache-dir \
     absl-py==1.0.0 \
     ale-py==0.7.3 \
     alembic==1.7.5 \
@@ -142,8 +143,6 @@ RUN python3.7 -m pip install -U pip && python3.7 -m pip install \
     terminado==0.12.1 \
     testpath==0.5.0 \
     toml==0.10.2 \
-    # torch==1.10.0 \
-    # torchvision==0.11.1 \
     tornado==6.1 \
     tqdm==4.62.3 \
     traitlets==5.1.1 \
@@ -158,9 +157,12 @@ RUN python3.7 -m pip install -U pip && python3.7 -m pip install \
 
 # # Install Torch with CUDA. Tensorflow apparently was not needed
 # RUN pip3 install tensorflow==2.0.0
-RUN python3.7 -m pip install -U pip && python3.7 -m \
-    pip install torch==1.10.0+cu113 torchvision==0.11.1+cu113 \
-    torchaudio==0.10.0+cu113 -f https://download.pytorch.org/whl/cu113/torch_stable.html
+RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
+    pip install --no-cache-dir \
+    torch==1.10.0+cu113 \
+    torchvision==0.11.1+cu113 \
+    torchaudio==0.10.0+cu113 \
+    -f https://download.pytorch.org/whl/cu113/torch_stable.html
 
 
 # Install library
