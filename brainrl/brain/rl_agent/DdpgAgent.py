@@ -4,9 +4,9 @@ import random
 import copy
 from copy import deepcopy
 
-from brainrl.brain.util.NnModel import NnModel
-from brainrl.brain.util.OUNoise import OUNoise
-from brainrl.brain.util.ReplayBuffer import ReplayBuffer
+from brainrl.brain.util.nn_model import NnModel
+from brainrl.brain.util.ou_noise import OUNoise
+from brainrl.brain.util.replay_buffer import ReplayBuffer
 
 import torch
 import torch.nn.functional as F

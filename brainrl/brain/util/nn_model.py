@@ -31,7 +31,7 @@ class NnModel(nn.Module):
             try:
                 with open(self.config, 'r') as j:
                     self.config = json.load(j)
-            except json.decoder.JSONDecodeError:
+            except FileNotFoundError:
                 with open(os.path.join(os.path.dirname(__file__),"..", "configs",'predefined_models.json'), 'r') as j:
                     self.config = json.load(j)[self.config]
 
