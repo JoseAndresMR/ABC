@@ -113,6 +113,7 @@ venv_abc
 
 # IDL
 .vscode/
+.idea/
 
 # Spyder project settings
 .spyderproject
