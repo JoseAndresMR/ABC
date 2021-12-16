@@ -139,3 +139,6 @@ runs/
 
 # Neurons
 neurons/
+
+# Files
+*.pdf
