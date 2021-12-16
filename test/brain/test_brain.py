@@ -36,32 +36,10 @@ class TestBrain(unittest.TestCase):
     }
 }
 
-    # def test_instance(self):
-    #     brain = Brain(config=self.get_config(),
-    #                    log_path='')
-    #     self.assertIsInstance(brain, Brain)
-    
-    # def test_forward(self):
-    #     brain = Brain(config=self.get_config(),
-    #                   log_path='')
-    #     action = brain.forward()
-
-    def test_run_attention_field_step(self):
+    def test_instance(self):
         brain = Brain(config=self.get_config(),
-                      log_path='')
-        brain.run_attention_field_step(0)
-    
-    # def test_set_state_and_reward(self):
-    #     brain = Brain(config=self.get_config(),
-    #                   log_path='')
-    
-    # def test_allocate_reward(self):
-    #     brain = Brain(config=self.get_config(),
-    #                   log_path='')
-    
-    # def test_make_plots(self):
-    #     brain = Brain(config=self.get_config(),
-    #                   log_path='')
+                       log_path='')
+        self.assertIsInstance(brain, Brain)
 
 
 if __name__ == '__main__':
