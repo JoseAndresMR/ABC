@@ -137,8 +137,8 @@ bin/environments/
 data/
 runs/
 
-# Neurons
-neurons/
+# Pytest
+events*
 
 # Files
 *.pdf
