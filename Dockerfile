@@ -12,8 +12,7 @@ RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
 # Install Python 3.7
 RUN apt-get -y update && apt-get -y install \
     python3.7 \
-    python3-pip \
-    ipython3
+    python3-pip
 RUN apt-get -y update && apt-get -y install swig
 
 # RUN python3.7 -m pip install -U pip && python3.7 -m pip install numpy==1.18.5 \
