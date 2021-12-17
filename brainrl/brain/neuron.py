@@ -6,8 +6,8 @@ from collections import deque
 import matplotlib.pyplot as plt
 from torch.utils.tensorboard import SummaryWriter
 
-from .rl_agent.DdpgAgent import DdpgAgent
-from .rl_agent.DQNAgent import DQNAgent
+from .rl_agent.ddpg_agent import DDPGAgent
+from .rl_agent.dqn_agent import DQNAgent
 
 
 class Neuron(object):
@@ -84,7 +84,7 @@ class Neuron(object):
 
         self.config["agent"]["ID"] = self.config["ID"]
         if self.config["agent"]["type"] == "DDPG":
-            self.rl_agent = DdpgAgent(
+            self.rl_agent = DDPGAgent(
                 self.config["agent"], self.log_path, self.state_size, self.action_size, random_seed=2)
         elif self.config["agent"]["type"] == "DQN":
             self.rl_agent = DQNAgent(
@@ -125,7 +125,6 @@ class Neuron(object):
 
         Results:
             action (np.array): Selected action. """
-
         self.action = self.rl_agent.act(self.state)
         self.decompose_action()
         return self.action

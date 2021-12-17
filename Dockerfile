@@ -15,9 +15,6 @@ RUN apt-get -y update && apt-get -y install \
     python3-pip \
     swig
 
-# RUN python3.7 -m pip install -U pip && python3.7 -m pip install numpy==1.18.5 \
-#     box2d-py
-
 # Install Python libraries with pip
 RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
     pip install --no-cache-dir \

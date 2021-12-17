@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import random
-import copy
+import json
 from copy import deepcopy
 
 from brainrl.brain.util.nn_model import NnModel
@@ -15,20 +15,10 @@ import torch.optim as optim
 import tensorboard as tb
 from torch.utils.tensorboard import SummaryWriter
 
-BUFFER_SIZE = int(1e6)  # replay buffer size
-BATCH_SIZE = 256        # minibatch size
-GAMMA = 0.99            # discount factor
-TAU = 1e-2              # for soft update of target parameters
-LR_ACTOR = 1e-3         # learning rate of the actor
-LR_CRITIC = 1e-3        # learning rate of the critic
-LEARN_EVERY = 8         # learn every LEARN_EVERY steps
-LEARN_STEPS = 4            # how often to execute the learn-function each LEARN_EVERY steps
-
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Selected device: ", device)
 
-
-class DdpgAgent(object):
+class DDPGAgent(object):
     """RL agent of Deep Deterministic Policy Gradient type."""
 
     def __init__(self, config, log_path, state_size, action_size, random_seed):
@@ -42,11 +32,12 @@ class DdpgAgent(object):
             random_seed (int): Random seed.
         """
         self.config = config
+        self.metaparams = self.config["definition"]["metaparameters"]
         self.log_path = log_path
         self.state_size = state_size
         self.action_size = action_size
         self.seed = random.seed(random_seed)
-        self.learn_step = 0  # for learning every n steps
+        self.learn_step = 0
         sizes = {"state" : state_size, "action" : action_size}
 
         # Actor Network (w/ Target Network)
@@ -56,7 +47,7 @@ class DdpgAgent(object):
         writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "actor_graph"))
         writer.add_graph(self.actor_local, fake_inputs)
         writer.close()
-        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=LR_ACTOR)
+        self.actor_optimizer = optim.Adam(self.actor_local.parameters(), lr=self.metaparams["lr_actor"])
 
         # Critic Network (w/ Target Network)
         self.critic_local = NnModel(deepcopy(config["models"]["critic"]), sizes, random_seed).to(device)
@@ -64,7 +55,7 @@ class DdpgAgent(object):
         writer = SummaryWriter(os.path.join(self.log_path,"neurons", "{}".format(config["ID"]), "critic_graph"))
         writer.add_graph(self.critic_local, fake_inputs)
         writer.close()
-        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=LR_CRITIC)
+        self.critic_optimizer = optim.Adam(self.critic_local.parameters(), lr=self.metaparams["lr_critic"])
 
         self.copy_weights(self.critic_local, self.critic_target)
         self.copy_weights(self.actor_local, self.actor_target)
@@ -73,7 +64,7 @@ class DdpgAgent(object):
         self.noise = OUNoise(1 * action_size, random_seed)
 
         # Replay memory
-        self.memory = ReplayBuffer(action_size, BUFFER_SIZE, BATCH_SIZE, random_seed)   
+        self.memory = ReplayBuffer(action_size, self.metaparams["buffer_size"], self.metaparams["batch_size"], random_seed)   
         
 
     def copy_weights(self, source, target):
@@ -98,14 +89,14 @@ class DdpgAgent(object):
         for state, action, reward, next_state, done in zip(states, actions, rewards, next_states, dones):
             self.memory.add(state, action, reward, next_state, done)
 
-        self.learn_step = (self.learn_step + 1) % LEARN_EVERY
+        self.learn_step = (self.learn_step + 1) % self.metaparams["learn_every"]
         # Learn every LEARN_EVERY steps if enough samples are available in memory
-        if len(self.memory) > BATCH_SIZE and self.learn_step == 0:
-            for _ in range(LEARN_STEPS):
+        if len(self.memory) > self.metaparams["batch_size"] and self.learn_step == 0:
+            for _ in range(self.metaparams["learn_steps"]):
                 experiences = self.memory.sample()
-                self.learn(experiences, GAMMA)
+                self.learn(experiences, self.metaparams["gamma"])
 
-    def act(self, state, add_noise=True, noise_factor=1.0):
+    def act(self, state, add_noise=False, noise_factor=1.0):
         """Returns actions for given state as per current policy.
         
         Args:
@@ -168,8 +159,8 @@ class DdpgAgent(object):
         self.actor_optimizer.step()
 
         # ----------------------- update target networks ----------------------- #
-        self.soft_update(self.critic_local, self.critic_target, TAU)
-        self.soft_update(self.actor_local, self.actor_target, TAU)
+        self.soft_update(self.critic_local, self.critic_target, self.metaparams["tau"])
+        self.soft_update(self.actor_local, self.actor_target, self.metaparams["tau"])
 
     def soft_update(self, local_model, target_model, tau):
         """Soft update model parameters.

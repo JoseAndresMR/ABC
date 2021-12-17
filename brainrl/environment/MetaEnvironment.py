@@ -25,6 +25,7 @@ class MetaEnvironment(object):
         self.config = config
         self.log_path = log_path
         self.environments = {}
+        self.active_envs = 0
         self.addEnvironments()
 
     def addEnvironments(self):
@@ -74,3 +75,5 @@ class MetaEnvironment(object):
             if self.environments[env["id"]]["finished"]:
                 self.environments[env["id"]]["env"].finishEnvironment()
                 self.environments.pop(env["id"])
+
+        return not bool(self.environments)

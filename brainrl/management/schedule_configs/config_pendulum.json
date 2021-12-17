@@ -5,21 +5,21 @@
         "play_ID": 2,
         "start_type": "step",
         "start_value": 0,
-        "max_episodes": 2000,
+        "max_episodes": 600,
         "max_t": 3000,
-        "success_avg": 100,
+        "success_avg": -300,
         "signals_map": {
             "state": [
                 {
                     "env_output": [
                         1,
-                        24
+                        3
                     ],
                     "neuron_type": "sensory-motor",
                     "neuron": 1,
                     "neuron_input": [
                         1,
-                        24
+                        3
                     ]
                 }
             ],
@@ -27,13 +27,13 @@
                 {
                     "env_input": [
                         1,
-                        4
+                        1
                     ],
                     "neuron_type": "sensory-motor",
                     "neuron": 1,
                     "neuron_output": [
                         1,
-                        4
+                        1
                     ]
                 }
             ]
