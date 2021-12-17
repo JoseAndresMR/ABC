@@ -18,7 +18,7 @@ from torch.utils.tensorboard import SummaryWriter
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print("Selected device: ", device)
 
-class DdpgAgent(object):
+class DDPGAgent(object):
     """RL agent of Deep Deterministic Policy Gradient type."""
 
     def __init__(self, config, log_path, state_size, action_size, random_seed):

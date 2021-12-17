@@ -1,10 +1,11 @@
-image: ubuntu:18.04
+image: python:3.7
 pipelines:
   pull-requests:
     '**': #this runs as default for any branch not elsewhere defined
       - step:
           script:
-            - docker build -t abc:1.0 -f Dockerfile_pipeline .
-            - docker run -it -v $(pwd):/repo abc:1.0 pytest
-options:
-  docker: true
+            - python3.7 -m pip install -U pip
+            - python3.7 -m pip install pytest
+            - python3.7 -m pip install -r requirements.txt
+            - python3.7 -m pip install -e .
+            - pytest

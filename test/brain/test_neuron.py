@@ -13,7 +13,18 @@ class TestNeuron(unittest.TestCase):
                 "agent" : {
                 "type" : "DDPG",
                 "additional_dim" : [3,1],
-                "definition" : "config/predefined_agents/ddpg_1.json",
+                "definition" : {
+                            "metaparameters": {
+                                "buffer_size" : 100000,
+                                "batch_size" : 256,
+                                "gamma" : 0.99,
+                                "tau" : 0.01,
+                                "lr_actor" : 0.002,
+                                "lr_critic" : 0.002,
+                                "learn_every" : 4,
+                                "learn_steps" : 2
+                            }
+                        },
                 "models": {
                     "actor" : "config/predefined_models/actor_udacity.json",
                     "critic" : "config/predefined_models/critic_udacity.json"
