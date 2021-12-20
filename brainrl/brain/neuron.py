@@ -132,7 +132,7 @@ class Neuron(object):
     def backprop(self):
         """ Apply the learning step and actualize state. """
 
-        if type(self.next_state) != type(np.array(1)):
+        if not isinstance(self.next_state, np.ndarray):
             done = True
         else:
             done = False

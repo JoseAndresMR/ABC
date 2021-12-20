@@ -88,12 +88,12 @@ class Brain(object):
         if self.forward_step > 0:
             [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
         [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
-        if self.neurons["intern"]:
+        if len(self.neurons["intern"]) > 0:
             self.runAttentionFieldStep(1)
             if self.forward_step > 0:
                 [neuron["neuron"].backprop() for neuron in self.neurons["intern"]]
             [neuron["neuron"].forward() for neuron in self.neurons["intern"]]
-        if len(self.neurons["all"]) > len(self.neurons["sensory-motor"]):
+        if len(self.neurons["motor"]) > 0:
             self.runAttentionFieldStep(2)
         if self.forward_step > 0:
             [neuron["neuron"].backprop() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
