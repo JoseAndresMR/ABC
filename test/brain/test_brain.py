@@ -36,19 +36,21 @@ class TestBrain(unittest.TestCase):
     }
 }
 
-    # def test_instance(self):
-    #     brain = Brain(config=self.get_config(),
-    #                    log_path='')
-    #     self.assertIsInstance(brain, Brain)
+    def test_instance(self):
+        brain = Brain(config=self.get_config(),
+                       log_path='')
+        self.assertIsInstance(brain, Brain)
 
     def test_state_and_reward(self):
         brain = Brain(config=self.get_config(),
                        log_path='')
-        brain.forward()
+        brain.set_state_and_reward()
 
-    def test_state_and_reward(self):
+    def test_forward(self):
         brain = Brain(config=self.get_config(),
                        log_path='')
+        for neuron in brain.neurons["sensory-motor"] + brain.neurons["sensory"]:
+            neuron["state"] = np.random.random((1, 37))
         brain.set_state_and_reward()
         brain.forward()
 
