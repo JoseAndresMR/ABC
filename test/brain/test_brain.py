@@ -49,10 +49,20 @@ class TestBrain(unittest.TestCase):
     def test_forward(self):
         brain = Brain(config=self.get_config(),
                        log_path='')
-        for neuron in brain.neurons["sensory-motor"] + brain.neurons["sensory"]:
+        for neuron in brain.neurons["sensory-motor"]:
             neuron["state"] = np.random.random((1, 37))
         brain.set_state_and_reward()
         brain.forward()
+
+    def test_performance(self):
+        brain = Brain(config=self.get_config(),
+                      log_path='')
+        self.assertTrue(brain.get_performance()==-99999)
+
+    def test_make_plots(self):
+        brain = Brain(config=self.get_config(),
+                      log_path='')
+        brain.make_plots()
 
 
 if __name__ == '__main__':

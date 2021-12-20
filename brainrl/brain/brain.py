@@ -152,12 +152,12 @@ class Brain(object):
 
     def allocate_reward(self, reward, attendeds):
         """ Split or backpropagate the reward given the attention weights each agent used to definde its state. """
-        split_rewards = np.array(attendeds)*reward
+        split_rewards = np.array(attendeds) * reward
         neurons = self.neurons["sensory"] + self.neurons["intern"]
         
         for i, split_reward in enumerate(split_rewards):
             if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"]:
-                if neurons[i]["reward"] == []:
+                if len(neurons[i]["reward"]) == 0:
                     neurons[i]["reward"] = split_reward
                 else:
                     neurons[i]["reward"] += split_reward
