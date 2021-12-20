@@ -131,17 +131,17 @@ class Brain(object):
         elif stage == 2:
             neurons = self.neurons["motor"]
         for i, value in enumerate(values):
-            neurons[i]["neuron"].setNextInputValue(np.array([value]))
+            neurons[i]["neuron"].set_next_input_value(np.array([value]))
             neurons[i]["neuron"].attended = attended[i]
 
     def set_state_and_reward(self):
         """ Transports the state and reward information from the information object in this class to inside each neurons' class
         and to the overall performace storage. """
-        [neuron["neuron"].setNextInputValue(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
-        [self.allocateReward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
-        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["sensory"]]
-        [neuron["neuron"].setReward(neuron["reward"]) for neuron in self.neurons["intern"]]
-        [neuron["neuron"].setReward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+        [neuron["neuron"].set_next_input_value(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+        [self.allocate_reward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+        [neuron["neuron"].set_reward(neuron["reward"]) for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].set_reward(neuron["reward"]) for neuron in self.neurons["intern"]]
+        [neuron["neuron"].set_reward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         
         self.scores_deque.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
         self.scores.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
@@ -162,7 +162,7 @@ class Brain(object):
                 else:
                     neurons[i]["reward"] += split_reward
                 if neurons[i]["neuron"].neuron_type != "sensory":
-                    self.allocateReward(split_reward, neurons[i]["neuron"].attended)
+                    self.allocate_reward(split_reward, neurons[i]["neuron"].attended)
 
     def get_performance(self):
         return self.performance
