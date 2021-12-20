@@ -36,10 +36,21 @@ class TestBrain(unittest.TestCase):
     }
 }
 
-    def test_instance(self):
+    # def test_instance(self):
+    #     brain = Brain(config=self.get_config(),
+    #                    log_path='')
+    #     self.assertIsInstance(brain, Brain)
+
+    def test_state_and_reward(self):
         brain = Brain(config=self.get_config(),
                        log_path='')
-        self.assertIsInstance(brain, Brain)
+        brain.forward()
+
+    def test_state_and_reward(self):
+        brain = Brain(config=self.get_config(),
+                       log_path='')
+        brain.set_state_and_reward()
+        brain.forward()
 
 
 if __name__ == '__main__':
