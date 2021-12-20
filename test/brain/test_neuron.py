@@ -12,7 +12,7 @@ class TestNeuron(unittest.TestCase):
         return {'ID': '1',
                 "agent" : {
                 "type" : "DDPG",
-                "additional_dim" : [3,1],
+                "additional_dim" : [3, 1],
                 "definition" : {
                             "metaparameters": {
                                 "buffer_size" : 100000,
