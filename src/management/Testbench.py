@@ -1,5 +1,4 @@
 import json, os
-import numpy as np
 import copy
 import shutil
 import optuna
@@ -38,32 +37,32 @@ class Testbench(object):
             self.base_config["brain"] = json.load(j)
         with open(os.path.join(self.configs_paths["schedule"],'{}.json'.format(self.config["base_configs"]["schedule"])), 'r') as j:
             self.base_config["schedule"] = json.load(j)
-
-        def expandJsons(nested_dict, prepath=()):
-            if type(nested_dict) == list:
-                for i,v in enumerate(nested_dict):
-                    path = prepath + (i,)
-                    expandJsons(v, path) # recursive call
-            elif type(nested_dict) == dict:
-                for k, v in nested_dict.items():
-                    path = prepath + (k,)
-                    if type(v) == str and len(v) >= 5 and v[-5:] == ".json": # found json
-                        folder, file = v.split("/")
-                        with open(os.path.join(self.configs_paths[folder],file), 'r') as j:
-                            setValueInDictWithPath(self.base_config, path, json.load(j))
-                    elif hasattr(v, 'items') or type(v) == list: # v is a dict or list
-                        expandJsons(v, path) # recursive call
         
-        expandJsons(self.base_config)
+        self.expandJsons(self.base_config)
 
         self.log_path = os.path.join(os.path.dirname(__file__),'..','..',"data/runs", self.config["id"])
+
+    def expandJsons(self, nested_dict, prepath=()):
+        if type(nested_dict) == list:
+            for i,v in enumerate(nested_dict):
+                path = prepath + (i,)
+                self.expandJsons(v, path) # recursive call
+        elif type(nested_dict) == dict:
+            for k, v in nested_dict.items():
+                path = prepath + (k,)
+                if type(v) == str and len(v) >= 5 and v[-5:] == ".json": # found json
+                    folder, file = v.split("/")
+                    with open(os.path.join(self.configs_paths[folder],file), 'r') as j:
+                        setValueInDictWithPath(self.base_config, path, json.load(j))
+                elif hasattr(v, 'items') or type(v) == list: # v is a dict or list
+                    self.expandJsons(v, path) # recursive call
 
     def experiences(self):
         """ Run all experiments in sequence, changing the alterations from the prior base configuration. """
         i = 0
         for experiment_config in self.config["experiments"]:
             def objective(trial):
-                for variable_name, variable_params  in self.test_variables.items():
+                for variable_name, variable_params in self.test_variables.items():
                     suggested_values = variable_params["suggested_values"]
                     x = trial.suggest_float(variable_name, suggested_values[0], suggested_values[1])
                     setValueInDictWithPath(current_config, variable_params["path"], x)
@@ -97,5 +96,7 @@ class Testbench(object):
             print(study.best_params)
             i += 1        
 
-tb = Testbench()
-tb.experiences()
+
+if __name__ == "__main__":
+    tb = Testbench()    
+    tb.experiences()

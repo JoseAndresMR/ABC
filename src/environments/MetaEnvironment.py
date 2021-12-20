@@ -33,11 +33,11 @@ class MetaEnvironment(object):
         Create and start all the environments required in this experience given the configuration.
         TODO: Dynamically create and close the envs when more complex schedulres are required.
         """
-        empty_env = {"env" : None, "state" : [], "action" : [], "reward" : [], "done" : False, "finished" : False, "info" : {}, "active" : False}
+        empty_env = {"env" : None, "state" : None, "action" : None, "reward" : None, "done" : False, "finished" : False, "info" : {}, "active" : False}
         
         envs = self.config["environments"]
         for env in envs:
-            self.environments[env["id"]] = deepcopy(empty_env)
+            self.environments[env["id"]] = deepcopy(empty_env) ### Test if deepcopy can be deleted
             if env["origin"] == "unity":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(env["file_path"], env["id"], self.log_path)
@@ -48,11 +48,11 @@ class MetaEnvironment(object):
 
     def startEnvironmentsEpisodes(self):
         """ Begin the first step of currently active environments. """
-        envs = self.config["schedule"]
-        for env in envs:
-            if env["active"]:
-                self.environments[env["env"]]["active"] = True
-                self.environments[env["env"]]["state"] = self.environments[env["env"]]["env"].startEpisodes(env["max_episodes"], env["max_t"], env["success_avg"])
+        envs_config= self.config["schedule"]
+        for env_config in envs_config:
+            if env_config["active"]:
+                self.environments[env_config["env"]]["active"] = True
+                self.environments[env_config["env"]]["state"] = self.environments[env_config["env"]]["env"].startEpisodes(env_config["max_episodes"], env_config["max_t"], env_config["success_avg"])
 
     def runSteps(self):
         """ Take one more step in the currently active environments. """

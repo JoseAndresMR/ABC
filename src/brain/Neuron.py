@@ -78,7 +78,7 @@ class Neuron(object):
             state (np.array): Observations taken by the agent on the Environment. """
 
         self.step += 1
-        if type(self.state) != type(np.array(1)):
+        if not isinstance(self.state, np.array):
             self.state = copy.deepcopy(state)
         else:
             self.next_state = copy.deepcopy(state)
@@ -111,7 +111,7 @@ class Neuron(object):
     def backprop(self):
         """ Apply the learning step and actualize state. """
 
-        if type(self.next_state) != type(np.array(1)):
+        if not isinstance(self.next_state, np.array):
             done = True
         else:
             done = False
