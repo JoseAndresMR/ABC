@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="brainrl",
-    description="Reinforcement learning framework with transfomers",
+    description="Reinforcement learning framework with attention",
     version="0.1",
     author="Jose Andrés Millán, Carlos Perales",
     author_email="ja.millan@4i.ai",
