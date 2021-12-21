@@ -23,20 +23,21 @@ class Testbench(object):
         Define initial configurations.
         """
 
+        self.config_path = ""
         with open(os.path.join(os.path.dirname(__file__),"configs",'config.jsonc'), 'r') as j:
             self.config = json.load(j)
-        self.configs_paths = {"envs" : os.path.join(os.path.dirname(__file__),"..","environments","configs")}
-        self.configs_paths["brain"] = os.path.join(os.path.dirname(__file__),"..","brain","configs")
-        self.configs_paths["schedule"] = os.path.join(os.path.dirname(__file__),"schedule_configs")
-        self.configs_paths["predefined_agents"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_agents")
-        self.configs_paths["predefined_models"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_models")
-        self.base_config = {}
-        with open(os.path.join(self.configs_paths["envs"],'{}.json'.format(self.config["base_configs"]["envs"])), 'r') as j:
-            self.base_config["envs"] = json.load(j)
-        with open(os.path.join(self.configs_paths["brain"],'{}.json'.format(self.config["base_configs"]["brain"])), 'r') as j:
-            self.base_config["brain"] = json.load(j)
-        with open(os.path.join(self.configs_paths["schedule"],'{}.json'.format(self.config["base_configs"]["schedule"])), 'r') as j:
-            self.base_config["schedule"] = json.load(j)
+        # self.configs_paths = {"envs" : os.path.join(os.path.dirname(__file__),"..","environments","configs")}
+        # self.configs_paths["brain"] = os.path.join(os.path.dirname(__file__),"..","brain","configs")
+        # self.configs_paths["schedule"] = os.path.join(os.path.dirname(__file__),"schedule_configs")
+        # self.configs_paths["predefined_agents"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_agents")
+        # self.configs_paths["predefined_models"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_models")
+        # self.base_config = {}
+        # with open(os.path.join(self.configs_paths["envs"],'{}.json'.format(self.config["base_configs"]["envs"])), 'r') as j:
+        #     self.base_config["envs"] = json.load(j)
+        # with open(os.path.join(self.configs_paths["brain"],'{}.json'.format(self.config["base_configs"]["brain"])), 'r') as j:
+        #     self.base_config["brain"] = json.load(j)
+        # with open(os.path.join(self.configs_paths["schedule"],'{}.json'.format(self.config["base_configs"]["schedule"])), 'r') as j:
+        #     self.base_config["schedule"] = json.load(j)
         
         self.expandJsons(self.base_config)
 
@@ -51,8 +52,7 @@ class Testbench(object):
             for k, v in nested_dict.items():
                 path = prepath + (k,)
                 if type(v) == str and len(v) >= 5 and v[-5:] == ".json": # found json
-                    folder, file = v.split("/")
-                    with open(os.path.join(self.configs_paths[folder],file), 'r') as j:
+                    with open(os.path.join(self.configs_path,v), 'r') as j:
                         setValueInDictWithPath(self.base_config, path, json.load(j))
                 elif hasattr(v, 'items') or type(v) == list: # v is a dict or list
                     self.expandJsons(v, path) # recursive call
