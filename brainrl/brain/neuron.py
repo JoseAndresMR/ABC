@@ -92,12 +92,13 @@ class Neuron(object):
         else:
             raise ValueError('neuron_type must be DDPG or DQN')
 
-    def set_next_input_value(self, state: np.array):
+    def set_next_input_value(self, state: np.ndarray):
         """ Receive next state from the Brain.
 
         Args:
             state (np.array): Observations taken by the agent on the Environment. """
-
+        # Sometimes, list appears
+        state = np.array(state) if not isinstance(state, np.ndarray) else state
         self.step += 1
         if not isinstance(self.state, np.ndarray):
             self.state = copy.deepcopy(state)
