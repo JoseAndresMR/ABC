@@ -14,6 +14,11 @@ class TestGymEpisodicEnvironment(unittest.TestCase):
         self.create_log_folder()
         env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
         self.assertIsInstance(env, GymEpisodicEnvironment)
+    
+    def test_finish(self):
+        self.create_log_folder()
+        env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
+        env.finish_environment()
 
 
 if __name__ == '__main__':
