@@ -1,8 +1,8 @@
+from .unity_episodic_environment import UnityEpisodicEnvironment
+from .gym_episodic_environment import GymEpisodicEnvironment
+from copy import deepcopy
 import json, os
 
-from .UnityEpisodicEnvironment import UnityEpisodicEnvironment
-from .GymEpisodicEnvironment import GymEpisodicEnvironment
-from copy import deepcopy
 
 class MetaEnvironment(object):
     """

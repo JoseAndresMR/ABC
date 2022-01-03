@@ -1,10 +1,10 @@
 from genericpath import exists
-from brainrl.environment.environment import Environment
+from brainrl.environment import GymEpisodicEnvironment
 import unittest
 import os
 
 
-class TestEnvironment(unittest.TestCase):
+class TestGymEpisodicEnvironment(unittest.TestCase):
     @staticmethod
     def create_log_folder(path=''):
         os.makedirs(os.path.join(path, 'log'),
@@ -12,8 +12,8 @@ class TestEnvironment(unittest.TestCase):
 
     def test_instance(self):
         self.create_log_folder()
-        env = Environment(id='gym', log_path='log')
-        self.assertIsInstance(env, Environment)
+        env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
+        self.assertIsInstance(env, GymEpisodicEnvironment)
 
 
 if __name__ == '__main__':
