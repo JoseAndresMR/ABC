@@ -37,7 +37,7 @@ class GymEpisodicEnvironment(Environment):
         
         self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
 
-    def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=50):
+    def start_episodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=50):
         """
         Start a new stack of episodes.
         
@@ -107,6 +107,6 @@ class GymEpisodicEnvironment(Environment):
         env_finished = env_finished or self.current_episode == self.n_episodes + 1 
         return ([reward], np.array([observation]), [done], env_finished)
 
-    def finishEnvironment(self):
+    def finish_environment(self):
         """ Close the environment to free memory and computation. """
         self.env.close()
