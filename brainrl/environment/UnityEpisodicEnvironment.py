@@ -2,7 +2,7 @@ from mlagents_envs.environment import UnityEnvironment
 import numpy as np
 from collections import deque
 import matplotlib.pyplot as plt
-from .Environment import Environment
+from .environment import Environment
 
 class UnityEpisodicEnvironment(Environment):
     """ OpenAI Unity, episodic environment. """
