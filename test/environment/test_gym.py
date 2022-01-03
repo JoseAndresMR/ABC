@@ -2,6 +2,7 @@ from genericpath import exists
 from brainrl.environment import GymEpisodicEnvironment
 import unittest
 import os
+import numpy as np
 
 
 class TestGymEpisodicEnvironment(unittest.TestCase):
@@ -15,6 +16,14 @@ class TestGymEpisodicEnvironment(unittest.TestCase):
         env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
         self.assertIsInstance(env, GymEpisodicEnvironment)
     
+    def test_start_step(self):
+        self.create_log_folder()
+        env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
+        action = np.random.random((1, 2))
+        env.set_action(action)
+        env.start_episodes()
+        env.step()
+
     def test_finish(self):
         self.create_log_folder()
         env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")

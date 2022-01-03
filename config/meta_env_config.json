@@ -1,0 +1,14 @@
+[
+    {
+        "origin": "gym",
+        "id": "gym",
+        "temporality": "episodic",
+        "name": "CartPole-v1"
+    },
+    {
+        "origin": "gym",
+        "id": "gym",
+        "temporality": "episodic",
+        "name": "CartPole-v2"
+    }
+]

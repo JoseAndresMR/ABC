@@ -17,7 +17,7 @@ class UnityEpisodicEnvironment(Environment):
             log_path (string): Path on disk to store gathered information about the experience  
         """
 
-        self.env = UnityEnvironment(file_name= file_path, no_graphics=True)
+        self.env = UnityEnvironment(file_name=file_path, no_graphics=True)
         self.brain_name = self.env.brain_names[0]
         brain = self.env.brains[self.brain_name]
         env_info = self.env.reset(train_mode=True)[self.brain_name]
@@ -34,7 +34,7 @@ class UnityEpisodicEnvironment(Environment):
         print("Environment: State type: {}. State size: {}".format(action_type, action_size))
         self.env_info = {"num_agents" : self.num_agents, "state_size" : state_size, "state_type" : state_type, "action_size" : action_size, "action_type" : action_type}
 
-    def startEpisodes(self, n_episodes=10000, max_t=3000, success_avg = 30, print_every=3):
+    def start_episodes(self, n_episodes=10000, max_t=3000, success_avg = 30, print_every=3):
         """
         Start a new stack of episodes.
         
@@ -105,6 +105,6 @@ class UnityEpisodicEnvironment(Environment):
         env_finished = self.current_episode == self.n_episodes + 1
         return (rewards, next_states, dones, env_finished)
 
-    def finishEnvironment(self):
+    def finish_environment(self):
         """ Close the environment to free memory and computation. """
         self.env.close()  # close the environment as it is no longer needed
