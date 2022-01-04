@@ -9,27 +9,72 @@ class TestNeuron(unittest.TestCase):
         """
         Same config for all the tests.
         """
-        return {'ID': '1',
-                "agent" : {
+        return {
+            "ID" : 1,
+            "agent" : {
                 "type" : "DDPG",
-                "additional_dim" : [3, 1],
+                "additional_dim" : [3,1],
                 "definition" : {
-                            "metaparameters": {
-                                "buffer_size" : 100000,
-                                "batch_size" : 256,
-                                "gamma" : 0.99,
-                                "tau" : 0.01,
-                                "lr_actor" : 0.002,
-                                "lr_critic" : 0.002,
-                                "learn_every" : 4,
-                                "learn_steps" : 2
-                            }
-                        },
+                    "metaparameters": {
+                        "buffer_size" : 100000,
+                        "batch_size" : 256,
+                        "gamma" : 0.99,
+                        "tau" : 0.01,
+                        "lr_actor" : 0.002,
+                        "lr_critic" : 0.002,
+                        "learn_every" : 4,
+                        "learn_steps" : 2
+                    }
+                },
                 "models": {
-                    "actor" : "config/predefined_models/actor_udacity.json",
-                    "critic" : "config/predefined_models/critic_udacity.json"
+                    "actor" : {
+                        "layers" : [
+                            {
+                                "type" : "BatchNorm1d",
+                                "size" : "state"
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : 256,
+                                "features" : ["relu"]
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : "action",
+                                "features" : ["tanh"]
+                            }
+                        ]
+                    },
+                    "critic" : {
+                        "layers" : [
+                            {
+                                "type" : "BatchNorm1d",
+                                "size" : "state"
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : 256,
+                                "features" : ["leaky_relu"]
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : 256,
+                                "features" : ["leaky_relu"],
+                                "concat" : ["action"]
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : 128,
+                                "features" : ["leaky_relu"]
+                            },
+                            {
+                                "type" : "linear",
+                                "size" : 1
+                            }
+                        ]
+                    }
                 }
-                        }
+            }
         }
 
     def test_instance(self):
