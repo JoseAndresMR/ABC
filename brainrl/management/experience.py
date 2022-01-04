@@ -26,7 +26,7 @@ class Experience(object):
         self.brain = Brain(config["brain"], log_path)
         self.config = config
 
-    def loop(self):
+    def loop(self, max_iterations=999999999999):
         """
         Perform the experience. Every spin, the metaenvironment takes a step and the observation is passed to the brain.
         It learns from prior experiences and decides new actions, whick are transferred to the metaenvironment.
@@ -36,8 +36,8 @@ class Experience(object):
         try:
             # TODO: dynamically start environments on env schedule
             self.meta_environment.start_environments_episodes()
-            for spin in range(999999999999):
-                if spin == 10000:
+            for spin in range(max_iterations):
+                if spin % 10000 == 0:
                     debug_flag = True
                 self.allocate_environement_output()
                 metaenv_finished = self.meta_environment.close_environments()

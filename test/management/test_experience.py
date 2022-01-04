@@ -15,14 +15,70 @@ class TestExperience(unittest.TestCase):
                     "neurons": [
                         {
                             "agent": {
-                                "type": "DQN",
+                                "type": "DDPG",
                                 "additional_dim": [
-                                    37,
-                                    4
+                                    3,
+                                    1
                                 ],
-                                "eps": [1.0, 0.99999, 0.1],
+                                "definition": {
+                                    "metaparameters": {
+                                        "buffer_size": 100000,
+                                        "batch_size": 256,
+                                        "gamma": 0.99,
+                                        "tau": 0.01,
+                                        "lr_actor": 0.002,
+                                        "lr_critic": 0.002,
+                                        "learn_every": 4,
+                                        "learn_steps": 2
+                                    }
+                                },
                                 "models": {
-                                    "actor": "actor_discrete_1"
+                                    "actor": {
+                                        "layers": [
+                                            {
+                                                "type": "BatchNorm1d",
+                                                "size": "state"
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": 256,
+                                                "features": ["relu"]
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": "action",
+                                                "features": ["tanh"]
+                                            }
+                                        ]
+                                    },
+                                    "critic": {
+                                        "layers": [
+                                            {
+                                                "type": "BatchNorm1d",
+                                                "size": "state"
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": 256,
+                                                "features": ["leaky_relu"]
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": 256,
+                                                "features": ["leaky_relu"],
+                                                "concat": ["action"]
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": 128,
+                                                "features": ["leaky_relu"]
+                                            },
+                                            {
+                                                "type": "linear",
+                                                "size": 1
+                                            }
+                                        ]
+                                    }
                                 }
                             }
                         }
@@ -40,30 +96,60 @@ class TestExperience(unittest.TestCase):
                 "origin": "gym",
                 "id": "gym0",
                 "temporality": "episodic",
-                "name": "CartPole-v0"
+                "name": "Pendulum-v1"
             },
             {
                 "origin": "gym",
                 "id": "gym1",
                 "temporality": "episodic",
-                "name": "CartPole-v1"
+                "name": "Pendulum-v1"
             }
         ],
             'schedule': [
-            {"signals_map": {"state": [],
-                             "action": []},
-                "active": True,
+            {
                 "env": "gym0",
-                "max_episodes": 1000,
+                "active": True,
+                "play_ID": 2,
+                "start_type": "step",
+                "start_value": 0,
+                "max_episodes": 600,
                 "max_t": 3000,
-                "success_avg": 30,
-                "name": "CartPole-v0"
+                "success_avg": -300,
+                "signals_map": {
+                    "state": [
+                        {
+                            "env_output": [
+                                1,
+                                3
+                            ],
+                            "neuron_type": "sensory-motor",
+                            "neuron": 1,
+                            "neuron_input": [
+                                1,
+                                3
+                            ]
+                        }
+                    ],
+                    "action": [
+                        {
+                            "env_input": [
+                                1,
+                                1
+                            ],
+                            "neuron_type": "sensory-motor",
+                            "neuron": 1,
+                            "neuron_output": [
+                                1,
+                                1
+                            ]
+                        }
+                    ]
+                }
             },
             {
-                "active": False,
-                "name": "CartPole-v1"
+                "env": "gym1",
+                "active": False
             }
-
         ]
         }
 
@@ -72,22 +158,24 @@ class TestExperience(unittest.TestCase):
         os.makedirs(os.path.join(path, 'log'),
                     exist_ok=True)
 
-    # def test_instance(self):
-    #     self.create_log_folder()
-    #     config = self.get_config()
-    #     exp = Experience(config=config, log_path='log')
-    #     self.assertIsInstance(exp, Experience)
-    
+    def test_instance(self):
+        self.create_log_folder()
+        config = self.get_config()
+        exp = Experience(config=config, log_path='log')
+        self.assertIsInstance(exp, Experience)
+
     def test_loop(self):
         self.create_log_folder()
         config = self.get_config()
         exp = Experience(config=config, log_path='log')
-        for neuron in exp.brain.neurons["sensory-motor"]:
-            neuron["state"] = np.random.random((1, 37))
-        for _, env in exp.meta_environment.environments.items():
-            env['env'].actions = np.random.random((1, 2))
-        result = exp.loop()
-        print(result)
+        result = exp.loop(max_iterations=3)
+        self.assertIsInstance(result, int)
+
+    def test_finish(self):
+        self.create_log_folder()
+        config = self.get_config()
+        exp = Experience(config=config, log_path='log')
+        exp.finish()
 
 
 if __name__ == '__main__':
