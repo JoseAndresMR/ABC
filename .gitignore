@@ -111,6 +111,10 @@ env.bak/
 venv.bak/
 venv_abc
 
+# IDL
+.vscode/
+.idea/
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -133,3 +137,10 @@ dmypy.json
 bin/environments/
 data/
 runs/
+
+# Pytest
+events*
+
+# Files
+*.pdf
+entry_point.py
