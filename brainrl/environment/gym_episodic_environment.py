@@ -77,7 +77,7 @@ class GymEpisodicEnvironment(Environment):
         env_finished = False
         if self.current_t < self.max_t:
             if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
-                self.actions = [np.argmax(self.actions)]
+                self.actions = np.argmax(self.actions)
             observation, reward, done, info = self.env.step(self.actions[0])
             # if self.current_episode >= 1000:
             #     self.env.render()
