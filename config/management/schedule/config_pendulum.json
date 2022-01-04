@@ -1,0 +1,42 @@
+[
+    {
+        "env": "gym",
+        "active": true,
+        "play_ID": 2,
+        "start_type": "step",
+        "start_value": 0,
+        "max_episodes": 600,
+        "max_t": 3000,
+        "success_avg": -300,
+        "signals_map": {
+            "state": [
+                {
+                    "env_output": [
+                        1,
+                        3
+                    ],
+                    "neuron_type": "sensory-motor",
+                    "neuron": 1,
+                    "neuron_input": [
+                        1,
+                        3
+                    ]
+                }
+            ],
+            "action": [
+                {
+                    "env_input": [
+                        1,
+                        1
+                    ],
+                    "neuron_type": "sensory-motor",
+                    "neuron": 1,
+                    "neuron_output": [
+                        1,
+                        1
+                    ]
+                }
+            ]
+        }
+    }
+]

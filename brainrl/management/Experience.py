@@ -5,8 +5,8 @@ import sys, os
 sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 import numpy as np
 
-from environments.MetaEnvironment import MetaEnvironment
-from brain.Brain import Brain
+from brainrl.environment.MetaEnvironment import MetaEnvironment
+from brainrl.brain.brain import Brain
 
 class Experience(object):
 
@@ -71,7 +71,7 @@ class Experience(object):
                         self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"] = addMatrixToTarget(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"],
                                                                                                     neuron_output,
                                                                                                     np.ones((first_dim, neuron_output[1]-neuron_output[0] + 1))*self.meta_environment.environments[env_conf["env"]]["reward"][0])
-        self.brain.setStateAndReward()
+        self.brain.set_state_and_reward()
 
     def allocateBrainOutput(self):
         """

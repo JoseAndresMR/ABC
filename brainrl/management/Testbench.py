@@ -1,9 +1,10 @@
 import json, os
 import copy
 import shutil
+from typing import NewType
 import optuna
 
-from Experience import Experience
+from .Experience import Experience
 
 def setValueInDictWithPath(dic, keys, value):
     for key in keys[:-1]:
@@ -18,14 +19,16 @@ class Testbench(object):
     Class to run batches of experiments following different settings.
     """
 
-    def __init__(self):
+    def __init__(self, config_folder_path, data_folder_path):
         """
         Define initial configurations.
         """
 
-        self.config_path = ""
-        with open(os.path.join(os.path.dirname(__file__),"configs",'config.jsonc'), 'r') as j:
-            self.config = json.load(j)
+        self.config_path = config_folder_path
+        with open(os.path.join(self.config_path,"management",'config.json'), 'r') as j:
+            self.base_config = json.load(j)
+        # self.base_config = self.config
+        self.log_path = os.path.join(data_folder_path,"runs", self.base_config["id"])
         # self.configs_paths = {"envs" : os.path.join(os.path.dirname(__file__),"..","environments","configs")}
         # self.configs_paths["brain"] = os.path.join(os.path.dirname(__file__),"..","brain","configs")
         # self.configs_paths["schedule"] = os.path.join(os.path.dirname(__file__),"schedule_configs")
@@ -41,8 +44,6 @@ class Testbench(object):
         
         self.expandJsons(self.base_config)
 
-        self.log_path = os.path.join(os.path.dirname(__file__),'..','..',"data/runs", self.config["id"])
-
     def expandJsons(self, nested_dict, prepath=()):
         if type(nested_dict) == list:
             for i,v in enumerate(nested_dict):
@@ -52,15 +53,16 @@ class Testbench(object):
             for k, v in nested_dict.items():
                 path = prepath + (k,)
                 if type(v) == str and len(v) >= 5 and v[-5:] == ".json": # found json
-                    with open(os.path.join(self.configs_path,v), 'r') as j:
+                    with open(os.path.join(self.config_path,v), 'r') as j:
                         setValueInDictWithPath(self.base_config, path, json.load(j))
-                elif hasattr(v, 'items') or type(v) == list: # v is a dict or list
+                    v = nested_dict[k]
+                if hasattr(v, 'items') or type(v) == list: # v is a dict or list
                     self.expandJsons(v, path) # recursive call
 
     def experiences(self):
         """ Run all experiments in sequence, changing the alterations from the prior base configuration. """
         i = 0
-        for experiment_config in self.config["experiments"]:
+        for experiment_config in self.base_config["experiments"]:
             def objective(trial):
                 for variable_name, variable_params in self.test_variables.items():
                     suggested_values = variable_params["suggested_values"]
@@ -76,10 +78,9 @@ class Testbench(object):
             if os.path.isdir(current_log_path):
                 shutil.rmtree(current_log_path)
             os.makedirs(current_log_path)
-            current_config = copy.deepcopy(self.base_config)
+            current_config = copy.deepcopy(self.base_config["base_configs"])
             for field, value in experiment_config["config_alterations"].items():
-                with open(os.path.join(self.configs_paths[field],'{}.json'.format(value)), 'r') as j:
-                    current_config[field] = json.load(j)
+                current_config[field] = value
             with open(os.path.join(current_log_path,"config.json"), 'w') as j:
                 json.dump(current_config, j)
             self.test_variables = {}
@@ -94,9 +95,4 @@ class Testbench(object):
             study.optimize(objective, n_trials=15)
             study.best_params  # E.g. {'x': 2.002108042}
             print(study.best_params)
-            i += 1        
-
-
-if __name__ == "__main__":
-    tb = Testbench()    
-    tb.experiences()
+            i += 1

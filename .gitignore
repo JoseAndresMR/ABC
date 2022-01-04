@@ -143,3 +143,4 @@ events*
 
 # Files
 *.pdf
+entry_point.py
