@@ -1,0 +1,8 @@
+[
+    {
+        "origin": "gym",
+        "id": "gym",
+        "temporality": "episodic",
+        "name": "Pendulum-v1"
+    }
+]

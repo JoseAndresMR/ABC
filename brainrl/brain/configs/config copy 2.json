@@ -1,0 +1,48 @@
+{
+    "neurons" : {
+        "sensory" : {
+            "neurons" : [
+                {
+                    "agent" : {
+                        "type" : "DDPG",
+                        "additional_dim" : 33,
+                        "models": {
+                            "actor" : "actor1",
+                            "critic" : "critic1"
+                        }
+                    }
+                }
+            ]
+        },
+        "intern" : {
+            "quantity" : 0,
+            "agent" : {
+                "type" : "DDPG",
+                "models": {
+                    "actor" : "actor1",
+                    "critic" : "critic1"
+                }
+            }
+        },
+        "motor" : {
+            "neurons" : [
+                {
+                    "agent" : {
+                        "type" : "DDPG",
+                        "additional_dim" : 4,
+                        "models": {
+                            "actor" : "actor1",
+                            "critic" : "critic1"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "attention_field":
+        {
+            "key_dim" : 3,
+            "value_dim" : 10,
+            "reward_backprop_thr" : 0.01
+        }
+}

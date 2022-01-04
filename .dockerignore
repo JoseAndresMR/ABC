@@ -1,0 +1,4 @@
+# Folders
+env/
+.vscode/
+*egg-info/

@@ -1,0 +1,8 @@
+[
+    {
+        "origin": "gym",
+        "id": "gym",
+        "temporality": "episodic",
+        "name": "BipedalWalker-v3"
+    }
+]

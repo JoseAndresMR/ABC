@@ -1,0 +1,38 @@
+{
+    "id": "time",
+    "base_configs": {
+        "envs": "config_pendulum",
+        "brain": "config_pendulum",
+        "schedule": "config_pendulum"
+    },
+    "experiments": [ 
+        {
+            "id": 1,
+            "config_alterations": {
+                "envs": "config_pendulum",
+                "schedule": "config_pendulum"
+            },
+            "type" : "grid_search",
+            "values": [
+                {
+                    "prefix": "prefix_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "metaparameters"],
+                    "values": {
+                        "tau": [
+                            0.01,
+                            0.02
+                        ],
+                        "lr_actor": [
+                            0.002,
+                            0.004
+                        ],
+                        "lr_critic": [
+                            0.002,
+                            0.004
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}

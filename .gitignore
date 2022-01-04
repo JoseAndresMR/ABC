@@ -109,7 +109,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-venv_drlnd_continuous_control
+venv_abc
+
+# IDL
+.vscode/
+.idea/
 
 # Spyder project settings
 .spyderproject
@@ -131,3 +135,12 @@ dmypy.json
 
 # Reinforcement Learning environments
 bin/environments/
+data/
+runs/
+
+# Pytest
+events*
+
+# Files
+*.pdf
+entry_point.py

@@ -1,0 +1,23 @@
+{
+    "layers" : [
+        {
+            "type" : "BatchNorm1d",
+            "size" : "state"
+        },
+        {
+            "type" : "linear",
+            "size" : 128,
+            "features" : ["leaky_relu"],
+            "concat" : ["action"]
+        },
+        {
+            "type" : "linear",
+            "size" : 128,
+            "features" : ["leaky_relu"]
+        },
+        {
+            "type" : "linear",
+            "size" : 1
+        }
+    ]
+}
