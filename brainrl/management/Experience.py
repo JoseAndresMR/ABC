@@ -1,15 +1,12 @@
 """
 One timeline exposition of a brain to different environments following a schedule
 """
-import sys, os
-sys.path.append(os.path.join(os.path.dirname(__file__),'..'))
 import numpy as np
+from brainrl.environment import MetaEnvironment
+from brainrl.brain import Brain
 
-from environments.MetaEnvironment import MetaEnvironment
-from brain.Brain import Brain
 
 class Experience(object):
-
     def __init__(self, config, log_path):
         """One timeline exposition of a brain to different environments following a schedule
 
@@ -23,7 +20,9 @@ class Experience(object):
                 - ID (string): identification of the experience
             log_path (string): Path on disk to store gathered information about the experience
         """
-        self.meta_environment = MetaEnvironment({"environments": config["envs"], "schedule": config["schedule"]}, log_path)
+        self.meta_environment = MetaEnvironment(config={"environments": config["envs"],
+                                                        "schedule": config["schedule"]},
+                                                log_path=log_path)
         self.brain = Brain(config["brain"], log_path)
         self.config = config
 
@@ -39,12 +38,12 @@ class Experience(object):
             for spin in range(999999999999):
                 if spin == 10000:
                     debug_flag = True
-                self.allocateEnvironementOutput()
+                self.allocate_environement_output()
                 metaenv_finished = self.meta_environment.closeEnvironments()
                 if metaenv_finished:
                     break
                 self.brain.forward()
-                self.allocateBrainOutput()
+                self.allocate_brain_output()
                 self.meta_environment.runSteps()
         except AssertionError as error:
             print(error)
@@ -52,7 +51,7 @@ class Experience(object):
 
         return spin
 
-    def allocateEnvironementOutput(self):
+    def allocate_environement_output(self):
         """
         Takes the observation from the metaenvionment - environments information object and maps it into brain information object.
         """
@@ -62,18 +61,18 @@ class Experience(object):
                 for map in env_conf["signals_map"]["state"]:
                     env_output = map["env_output"]
                     neuron_input = map["neuron_input"]
-                    self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"] = addMatrixToTarget(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"],
+                    self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"] = add_matrix_to_target(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"],
                                                                                                 neuron_input,
                                                                                                 self.meta_environment.environments[env_conf["env"]]["state"][:, env_output[0]-1: env_output[1]])
                 for map in env_conf["signals_map"]["action"]:
                     if self.meta_environment.environments[env_conf["env"]]["reward"] != []:
                         neuron_output = map["neuron_output"]
-                        self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"] = addMatrixToTarget(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"],
+                        self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"] = add_matrix_to_target(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"],
                                                                                                     neuron_output,
                                                                                                     np.ones((first_dim, neuron_output[1]-neuron_output[0] + 1))*self.meta_environment.environments[env_conf["env"]]["reward"][0])
         self.brain.setStateAndReward()
 
-    def allocateBrainOutput(self):
+    def allocate_brain_output(self):
         """
         Takes the actions decided by the brain in the information object and maps it into the metaenvionment - environments information object.
         """
@@ -83,7 +82,7 @@ class Experience(object):
                     if self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"].size != 0:
                         neuron_output = map["neuron_output"]
                         env_input = map["env_input"]
-                        self.meta_environment.environments[env_conf["env"]]["action"] = addMatrixToTarget(self.meta_environment.environments[env_conf["env"]]["action"],
+                        self.meta_environment.environments[env_conf["env"]]["action"] = add_matrix_to_target(self.meta_environment.environments[env_conf["env"]]["action"],
                                                                                             env_input,
                                                                                             self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
         self.meta_environment.setAction()
@@ -93,7 +92,7 @@ class Experience(object):
         del self.brain
         del self.config
 
-def addMatrixToTarget(target_matrix, target_dim, added_matrix):
+def add_matrix_to_target(target_matrix, target_dim, added_matrix):
     """ Adds a matrix in the desired cooredinates of a bigger matrix
 
     Args:
@@ -112,6 +111,10 @@ def addMatrixToTarget(target_matrix, target_dim, added_matrix):
         if target_dim[0]-1 == target_matrix.shape[1]:
             target_matrix = np.concatenate((target_matrix, added_matrix),1)
         else:
-            target_matrix = np.concatenate((target_matrix, np.zeros((target_matrix.shape[0], target_dim[0]-1 - target_matrix.shape[1])), added_matrix),1)
+            target_matrix = np.concatenate((target_matrix,
+                                            np.zeros((target_matrix.shape[0],
+                                                      target_dim[0] - 1 - target_matrix.shape[1])),
+                                            added_matrix),
+                                           1)
 
     return target_matrix
