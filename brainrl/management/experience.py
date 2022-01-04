@@ -34,7 +34,8 @@ class Experience(object):
         print("Experience: Starting loop")
         metaenv_finished = False
         try:
-            self.meta_environment.startEnvironmentsEpisodes() ### TODO: dynamically start environments on env schedule
+            # TODO: dynamically start environments on env schedule
+            self.meta_environment.startEnvironmentsEpisodes()
             for spin in range(999999999999):
                 if spin == 10000:
                     debug_flag = True
@@ -57,19 +58,20 @@ class Experience(object):
         """
         for env_conf in self.config["schedule"]:
             if env_conf["active"]:
-                first_dim = self.meta_environment.environments[env_conf["env"]]["state"].shape[0]
+                first_dim = self.meta_environment.environments[env_conf["env"]
+                                                               ]["state"].shape[0]
                 for map in env_conf["signals_map"]["state"]:
                     env_output = map["env_output"]
                     neuron_input = map["neuron_input"]
                     self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"] = add_matrix_to_target(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["state"],
-                                                                                                neuron_input,
-                                                                                                self.meta_environment.environments[env_conf["env"]]["state"][:, env_output[0]-1: env_output[1]])
+                                                                                                            neuron_input,
+                                                                                                            self.meta_environment.environments[env_conf["env"]]["state"][:, env_output[0]-1: env_output[1]])
                 for map in env_conf["signals_map"]["action"]:
                     if self.meta_environment.environments[env_conf["env"]]["reward"] != []:
                         neuron_output = map["neuron_output"]
                         self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"] = add_matrix_to_target(self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["reward"],
-                                                                                                    neuron_output,
-                                                                                                    np.ones((first_dim, neuron_output[1]-neuron_output[0] + 1))*self.meta_environment.environments[env_conf["env"]]["reward"][0])
+                                                                                                                 neuron_output,
+                                                                                                                 np.ones((first_dim, neuron_output[1]-neuron_output[0] + 1))*self.meta_environment.environments[env_conf["env"]]["reward"][0])
         self.brain.setStateAndReward()
 
     def allocate_brain_output(self):
@@ -83,14 +85,15 @@ class Experience(object):
                         neuron_output = map["neuron_output"]
                         env_input = map["env_input"]
                         self.meta_environment.environments[env_conf["env"]]["action"] = add_matrix_to_target(self.meta_environment.environments[env_conf["env"]]["action"],
-                                                                                            env_input,
-                                                                                            self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
+                                                                                                             env_input,
+                                                                                                             self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
         self.meta_environment.setAction()
 
     def finish(self):
         del self.meta_environment
         del self.brain
         del self.config
+
 
 def add_matrix_to_target(target_matrix, target_dim, added_matrix):
     """ Adds a matrix in the desired cooredinates of a bigger matrix
@@ -106,10 +109,10 @@ def add_matrix_to_target(target_matrix, target_dim, added_matrix):
     if target_matrix == []:
         target_matrix = added_matrix
     elif target_dim[1] <= target_matrix.shape[1]:
-        target_matrix[:,target_dim[0]-1:target_dim[1]] = added_matrix
+        target_matrix[:, target_dim[0]-1:target_dim[1]] = added_matrix
     else:
         if target_dim[0]-1 == target_matrix.shape[1]:
-            target_matrix = np.concatenate((target_matrix, added_matrix),1)
+            target_matrix = np.concatenate((target_matrix, added_matrix), 1)
         else:
             target_matrix = np.concatenate((target_matrix,
                                             np.zeros((target_matrix.shape[0],

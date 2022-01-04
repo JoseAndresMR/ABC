@@ -2,12 +2,13 @@ import numpy as np
 import random
 import copy
 
+
 class OUNoise:
     """Ornstein-Uhlenbeck process."""
 
     def __init__(self, size, seed, mu=0., theta=0.15, sigma=0.2):
         """Initialize parameters and noise process.
-        
+
         Args:
             size (int): Size of the noised output. 
             seed (int): Start poinf for the random initialisation.
@@ -27,6 +28,7 @@ class OUNoise:
     def sample(self):
         """Update internal state and return it as a noise sample."""
         x = self.state
-        dx = self.theta * (self.mu - x) + self.sigma * np.array([random.random() for i in range(len(x))])
+        dx = self.theta * (self.mu - x) + self.sigma * \
+            np.array([random.random() for i in range(len(x))])
         self.state = x + dx
         return self.state

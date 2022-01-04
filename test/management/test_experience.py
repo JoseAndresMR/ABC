@@ -3,7 +3,7 @@ import unittest
 import os
 import numpy as np
 
-from brainrl.management.Experience import Experience
+from brainrl.management.experience import Experience
 
 
 class TestExperience(unittest.TestCase):
