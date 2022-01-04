@@ -34,8 +34,8 @@ class MetaEnvironment(object):
         Create and start all the environments required in this experience given the configuration.
         TODO: Dynamically create and close the envs when more complex schedulres are required.
         """
-        empty_env = {"env": None, "state": None, "action": [], "reward": [],
-                     "done": False, "finished": False, "info": {}, "active": False}
+        empty_env = {"env" : None, "state" : None, "action" : [], "reward" : [],
+                     "done" : False, "finished" : False, "info" : {}, "active" : False}
 
         envs = self.config["environments"]
         for env in envs:

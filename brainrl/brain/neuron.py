@@ -75,7 +75,7 @@ class Neuron(object):
             self.state_size = self.v_dim
             self.action_size = self.k_dim + self.environment_signal_size
             self.query = np.random.rand(1, self.k_dim)
-        
+
         else:
             raise ValueError('neuron_type must be:', self.neuron_types)
 
@@ -132,7 +132,6 @@ class Neuron(object):
 
     def backprop(self):
         """ Apply the learning step and actualize state. """
-
         if not isinstance(self.next_state, np.ndarray):
             done = True
         else:

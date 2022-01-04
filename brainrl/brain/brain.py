@@ -1,22 +1,23 @@
+from .attention_field import AttentionField
+from .neuron import Neuron
+from torch.utils.tensorboard import SummaryWriter
+import copy
+from mpl_toolkits.mplot3d import axes3d
+from mpl_toolkits import mplot3d
+import pandas as pd
+from collections import deque
+import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
 import json
 import os
-import seaborn as sns; sns.set_theme()
-import matplotlib.pyplot as plt
-from collections import deque
-import pandas as pd
-from mpl_toolkits import mplot3d
-from mpl_toolkits.mplot3d import axes3d
-import copy
-from torch.utils.tensorboard import SummaryWriter
+import seaborn as sns
+sns.set_theme()
 
-from .neuron import Neuron
-from .attention_field import AttentionField
 
 class Brain(object):
     """ Creation, interconnection and management of neurons. """
-    
+
     def __init__(self, config: dict, log_path: str):
         """ Initialization of neurons, attention field, and data management. 
 
@@ -41,10 +42,12 @@ class Brain(object):
             log_path (string): Path on disk to store gathered information about the experience
         """
 
-        self.neurons = {"all": [], "sensory-motor" : [], "sensory" : [], "intern" : [], "motor" : []}
+        self.neurons = {"all": [], "sensory-motor": [],
+                        "sensory": [], "intern": [], "motor": []}
         self.config = config
-        self.log_path = os.path.join(log_path,"brain")
-        self.k_dim, self.v_dim = self.config["attention_field"]["key_dim"], self.config["attention_field"]["value_dim"]
+        self.log_path = os.path.join(log_path, "brain")
+        self.k_dim, self.v_dim = self.config["attention_field"][
+            "key_dim"], self.config["attention_field"]["value_dim"]
         self.attention_field = AttentionField(self.k_dim, self.v_dim)
         self.spawn_neurons()
         self.forward_step = 0
@@ -61,20 +64,24 @@ class Brain(object):
             if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
                 for neuron_config in type_neuron_config["neurons"]:
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim, self.v_dim, neuron_config["agent"]["additional_dim"])
+                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim,
+                                          self.v_dim, neuron_config["agent"]["additional_dim"])
 
             elif neuron_type == "intern":
                 for _ in range(type_neuron_config["quantity"]):
                     neuron_config = copy.deepcopy(type_neuron_config)
                     neuron_config.pop("quantity")
                     neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim, self.v_dim)
+                    self.spawn_one_neuron(
+                        neuron_type, neuron_config, self.k_dim, self.v_dim)
 
-    def spawn_one_neuron(self, neuron_type, config, k_dim, v_dim, additional_dim = None):
+    def spawn_one_neuron(self, neuron_type, config, k_dim, v_dim, additional_dim=None):
         """ Creation of a neuron and its inclussion in the management objects. """
-        empty_neuron = {"neuron" : None, "state" : [], "next_state" : [], "action" : [], "reward" : [], "attended" : [], "info" : {"type" : ""}}
+        empty_neuron = {"neuron": None, "state": [], "next_state": [
+        ], "action": [], "reward": [], "attended": [], "info": {"type": ""}}
         neuron = deepcopy(empty_neuron)
-        neuron["neuron"] = Neuron(neuron_type, config, self.log_path, k_dim, v_dim, additional_dim)
+        neuron["neuron"] = Neuron(
+            neuron_type, config, self.log_path, k_dim, v_dim, additional_dim)
         neuron["info"]["type"] = neuron_type
         self.neurons["all"].append(neuron)
         self.neurons[neuron_type].append(neuron)
@@ -91,12 +98,14 @@ class Brain(object):
         if len(self.neurons["intern"]) > 0:
             self.runAttentionFieldStep(1)
             if self.forward_step > 0:
-                [neuron["neuron"].backprop() for neuron in self.neurons["intern"]]
+                [neuron["neuron"].backprop()
+                 for neuron in self.neurons["intern"]]
             [neuron["neuron"].forward() for neuron in self.neurons["intern"]]
         if len(self.neurons["motor"]) > 0:
             self.runAttentionFieldStep(2)
         if self.forward_step > 0:
-            [neuron["neuron"].backprop() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+            [neuron["neuron"].backprop()
+             for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
         for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]:
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
@@ -110,20 +119,22 @@ class Brain(object):
 
         if stage == 1 or stage == 2:
             for neuron in self.neurons["sensory"]:
-                self.attention_field.add_entries(None, neuron["neuron"].key, neuron["neuron"].output_value)
+                self.attention_field.add_entries(
+                    None, neuron["neuron"].key, neuron["neuron"].output_value)
         if stage == 1:
             for neuron in self.neurons["intern"]:
                 self.attention_field.add_entries(neuron["neuron"].query,
-                                                neuron["neuron"].key,
-                                                neuron["neuron"].output_value)
+                                                 neuron["neuron"].key,
+                                                 neuron["neuron"].output_value)
         elif stage == 2:
             for neuron in self.neurons["intern"]:
                 self.attention_field.add_entries(None,
-                                                neuron["neuron"].key,
-                                                neuron["neuron"].output_value)
+                                                 neuron["neuron"].key,
+                                                 neuron["neuron"].output_value)
         if stage == 2:
             for neuron in self.neurons["motor"]:
-                self.attention_field.add_entries(neuron["neuron"].query, None, None)
+                self.attention_field.add_entries(
+                    neuron["neuron"].query, None, None)
 
         values, attended = self.attention_field.run_step()
         if stage == 1:
@@ -137,14 +148,21 @@ class Brain(object):
     def set_state_and_reward(self):
         """ Transports the state and reward information from the information object in this class to inside each neurons' class
         and to the overall performace storage. """
-        [neuron["neuron"].set_next_input_value(neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
-        [self.allocate_reward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
-        [neuron["neuron"].set_reward(neuron["reward"]) for neuron in self.neurons["sensory"]]
-        [neuron["neuron"].set_reward(neuron["reward"]) for neuron in self.neurons["intern"]]
-        [neuron["neuron"].set_reward(np.array(neuron["reward"]).mean()) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
-        
-        self.scores_deque.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
-        self.scores.append(np.array([np.array(neuron["reward"]).mean() for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        [neuron["neuron"].set_next_input_value(
+            neuron["state"]) for neuron in self.neurons["sensory-motor"] + self.neurons["sensory"]]
+        [self.allocate_reward(np.array(neuron["reward"]).mean(), neuron["neuron"].attended)
+         for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+        [neuron["neuron"].set_reward(neuron["reward"])
+         for neuron in self.neurons["sensory"]]
+        [neuron["neuron"].set_reward(neuron["reward"])
+         for neuron in self.neurons["intern"]]
+        [neuron["neuron"].set_reward(np.array(neuron["reward"]).mean(
+        )) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
+
+        self.scores_deque.append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        self.scores.append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
         self.performance = np.mean(self.scores_deque)
 
         for neuron in self.neurons["all"]:
@@ -154,7 +172,7 @@ class Brain(object):
         """ Split or backpropagate the reward given the attention weights each agent used to definde its state. """
         split_rewards = np.array(attendeds) * reward
         neurons = self.neurons["sensory"] + self.neurons["intern"]
-        
+
         for i, split_reward in enumerate(split_rewards):
             if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"]:
                 if len(neurons[i]["reward"]) == 0:
@@ -162,7 +180,8 @@ class Brain(object):
                 else:
                     neurons[i]["reward"] += split_reward
                 if neurons[i]["neuron"].neuron_type != "sensory":
-                    self.allocate_reward(split_reward, neurons[i]["neuron"].attended)
+                    self.allocate_reward(
+                        split_reward, neurons[i]["neuron"].attended)
 
     def get_performance(self):
         return self.performance
@@ -170,11 +189,11 @@ class Brain(object):
     def make_plots(self):
         """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
 
-        ### Reward scalar
+        # Reward scalar
         self.tensorboard_writer.add_scalar('avg_score',
-                                        np.mean(self.scores_deque),
-                                        self.forward_step)
-        ### Attention heatmap. TODO: to tensorboard
+                                           np.mean(self.scores_deque),
+                                           self.forward_step)
+        # Attention heatmap. TODO: to tensorboard
         # fig, ax = plt.subplots()
         # df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
         #                     index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
@@ -190,7 +209,7 @@ class Brain(object):
         # plt.title("Brain: Full Attention field")
         # plt.savefig('Attention.png')
 
-        ### 3D Attention Field. TODO: to tensorboard
+        # 3D Attention Field. TODO: to tensorboard
         # plt.rcParams["legend.fontsize"] = 10
         # fig = plt.figure()
         # ax = fig.gca(projection="3d")
@@ -203,7 +222,7 @@ class Brain(object):
         #     x = list(zip(np.zeros(self.config["attention_field"]["key_dim"]), key))
         #     ax.plot(x[0], x[1], x[2], color = "black")
         #     ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "green")
-            
+
         # other_neurons = self.neurons["sensory"] + self.neurons["intern"]
         # for neuron in self.neurons["intern"]:
         #     key = neuron["neuron"].key[0]
