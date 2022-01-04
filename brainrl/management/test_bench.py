@@ -1,12 +1,14 @@
-import json, os
+import json
+import os
 import copy
 import shutil
 from typing import NewType
 import optuna
 
-from .Experience import Experience
+from brainrl.management.experience import Experience
 
-def setValueInDictWithPath(dic, keys, value):
+
+def set_value_in_dict_with_path(dic, keys, value):
     for key in keys[:-1]:
         if type(dic) == dict:
             dic = dic.setdefault(key, {})
@@ -14,7 +16,8 @@ def setValueInDictWithPath(dic, keys, value):
             dic = dic[key]
     dic[keys[-1]] = value
 
-class Testbench(object):
+
+class TestBench(object):
     """
     Class to run batches of experiments following different settings.
     """
@@ -54,12 +57,12 @@ class Testbench(object):
                 path = prepath + (k,)
                 if type(v) == str and len(v) >= 5 and v[-5:] == ".json": # found json
                     with open(os.path.join(self.config_path,v), 'r') as j:
-                        setValueInDictWithPath(self.base_config, path, json.load(j))
+                        set_value_in_dict_with_path(self.base_config, path, json.load(j))
                     v = nested_dict[k]
                 if hasattr(v, 'items') or type(v) == list: # v is a dict or list
                     self.expandJsons(v, path) # recursive call
 
-    def experiences(self):
+    def experiences(self, max_iterations=999999999999, n_trials=15):
         """ Run all experiments in sequence, changing the alterations from the prior base configuration. """
         i = 0
         for experiment_config in self.base_config["experiments"]:
@@ -67,10 +70,10 @@ class Testbench(object):
                 for variable_name, variable_params in self.test_variables.items():
                     suggested_values = variable_params["suggested_values"]
                     x = trial.suggest_float(variable_name, suggested_values[0], suggested_values[1])
-                    setValueInDictWithPath(current_config, variable_params["path"], x)
+                    set_value_in_dict_with_path(current_config, variable_params["path"], x)
 
                 exp = Experience(current_config, current_log_path)
-                performance = exp.loop()
+                performance = exp.loop(max_iterations=max_iterations)
                 exp.finish()
                 return performance
 

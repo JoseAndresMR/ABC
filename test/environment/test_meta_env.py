@@ -13,13 +13,13 @@ class TestMetaEnvironment(unittest.TestCase):
                 "origin": "gym",
                 "id": "gym0",
                 "temporality": "episodic",
-                "name": "CartPole-v0"
+                "name": "Pendulum-v1"
             },
             {
                 "origin": "gym",
                 "id": "gym1",
                 "temporality": "episodic",
-                "name": "CartPole-v1"
+                "name": "Pendulum-v1"
             }
         ],
             'schedule': [
@@ -29,11 +29,11 @@ class TestMetaEnvironment(unittest.TestCase):
                 "max_episodes": 1000,
                 "max_t": 3000,
                 "success_avg": 30,
-                "name": "CartPole-v0"
+                "name": "Pendulum-v1"
             },
             {
                 "active": False,
-                "name": "CartPole-v1"
+                "name": "Pendulum-v1"
             }
         ]
         }
