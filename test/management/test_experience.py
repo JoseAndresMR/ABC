@@ -50,7 +50,8 @@ class TestExperience(unittest.TestCase):
             }
         ],
             'schedule': [
-            {
+            {"signals_map": {"state": [],
+                             "action": []},
                 "active": True,
                 "env": "gym0",
                 "max_episodes": 1000,
@@ -62,6 +63,7 @@ class TestExperience(unittest.TestCase):
                 "active": False,
                 "name": "CartPole-v1"
             }
+
         ]
         }
 
@@ -70,11 +72,22 @@ class TestExperience(unittest.TestCase):
         os.makedirs(os.path.join(path, 'log'),
                     exist_ok=True)
 
-    def test_instance(self):
+    # def test_instance(self):
+    #     self.create_log_folder()
+    #     config = self.get_config()
+    #     exp = Experience(config=config, log_path='log')
+    #     self.assertIsInstance(exp, Experience)
+    
+    def test_loop(self):
         self.create_log_folder()
         config = self.get_config()
-        env = Experience(config=config, log_path='log')
-        self.assertIsInstance(env, Experience)
+        exp = Experience(config=config, log_path='log')
+        for neuron in exp.brain.neurons["sensory-motor"]:
+            neuron["state"] = np.random.random((1, 37))
+        for _, env in exp.meta_environment.environments.items():
+            env['env'].actions = np.random.random((1, 2))
+        result = exp.loop()
+        print(result)
 
 
 if __name__ == '__main__':

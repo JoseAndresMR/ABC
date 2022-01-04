@@ -63,7 +63,7 @@ class GymEpisodicEnvironment(Environment):
         return self.states
 
     def step(self):
-        """ Apply the chosen actions in the enviornemnt, then receive the reward and next observations.
+        """ Apply the chosen actions in the environment, then receive the reward and next observations.
         When the episode finishes, check if the performance is good enough and if log is required.
 
         Returns:

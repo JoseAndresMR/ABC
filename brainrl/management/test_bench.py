@@ -16,7 +16,7 @@ def setValueInDictWithPath(dic, keys, value):
     dic[keys[-1]] = value
 
 
-class Testbench(object):
+class TestBench(object):
     """
     Class to run batches of experiments following different settings.
     """
