@@ -58,7 +58,7 @@ class MetaEnvironment(object):
         for env_config in envs_config:
             if env_config["active"]:
                 self.environments[env_config["env"]]["active"] = True
-                self.environments[env_config["env"]]["state"] = self.environments[env_config["env"]]["env"].startEpisodes(
+                self.environments[env_config["env"]]["state"] = self.environments[env_config["env"]]["env"].start_episodes(
                     env_config["max_episodes"], env_config["max_t"], env_config["success_avg"])
 
     def run_steps(self):
