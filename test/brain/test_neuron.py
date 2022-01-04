@@ -10,6 +10,7 @@ class TestNeuron(unittest.TestCase):
         Same config for all the tests.
         """
         return {
+            "ID" : 1,
             "agent" : {
                 "type" : "DDPG",
                 "additional_dim" : [3,1],
