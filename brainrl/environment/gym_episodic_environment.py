@@ -2,7 +2,7 @@ import gym
 import numpy as np
 from collections import deque
 import matplotlib.pyplot as plt
-from .Environment import Environment
+from .environment import Environment
 
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """
@@ -33,11 +33,15 @@ class GymEpisodicEnvironment(Environment):
 
         print("Environment: Starting Gym Environment called {}".format(name))
         print("Environment: State type: {}. State size: {}".format(state_type, state_size))
-        print("Environment: State type: {}. State size: {}".format(action_type, action_size))
+        print("Environment: Action type: {}. Action size: {}".format(action_type, action_size))
         
-        self.env_info = {"num_agents" : 1, "state_type": state_type, "state_size" : state_size, "action_size" : action_size, "action_type" : action_type}
+        self.env_info = {"num_agents" : 1,
+                         "state_type": state_type,
+                         "state_size": state_size,
+                         "action_size": action_size,
+                         "action_type": action_type}
 
-    def startEpisodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=50):
+    def start_episodes(self, n_episodes=1000, max_t=3000, success_avg = 30, print_every=50):
         """
         Start a new stack of episodes.
         
@@ -48,7 +52,8 @@ class GymEpisodicEnvironment(Environment):
             print_every (int): number of episodes skipped before the log is updated.
         """
 
-        self.n_episodes, self.max_t, self.print_every, self.success_avg = n_episodes, max_t, print_every, success_avg
+        self.n_episodes, self.max_t, self.print_every, self.success_avg = \
+            n_episodes, max_t, print_every, success_avg
         self.current_episode, self.current_t = 0, 0
 
         self.scores_deque = deque(maxlen=self.print_every)
@@ -107,6 +112,6 @@ class GymEpisodicEnvironment(Environment):
         env_finished = env_finished or self.current_episode == self.n_episodes + 1 
         return ([reward], np.array([observation]), [done], env_finished)
 
-    def finishEnvironment(self):
+    def finish_environment(self):
         """ Close the environment to free memory and computation. """
         self.env.close()

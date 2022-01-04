@@ -1,8 +1,9 @@
-import json, os
-
-from .UnityEpisodicEnvironment import UnityEpisodicEnvironment
-from .GymEpisodicEnvironment import GymEpisodicEnvironment
+from .unity_episodic_environment import UnityEpisodicEnvironment
+from .gym_episodic_environment import GymEpisodicEnvironment
 from copy import deepcopy
+import json
+import os
+
 
 class MetaEnvironment(object):
     """
@@ -10,7 +11,7 @@ class MetaEnvironment(object):
     It serves as a common interface with brain.
     """
 
-    def __init__(self,config, log_path):
+    def __init__(self, config, log_path):
         """MetaEnvironment gathers and manages all the environments currently active in the current experience.
         It serves as a common interface with brain.
 
@@ -26,35 +27,41 @@ class MetaEnvironment(object):
         self.log_path = log_path
         self.environments = {}
         self.active_envs = 0
-        self.addEnvironments()
+        self.add_environments()
 
-    def addEnvironments(self):
+    def add_environments(self):
         """
         Create and start all the environments required in this experience given the configuration.
         TODO: Dynamically create and close the envs when more complex schedulres are required.
         """
-        empty_env = {"env" : None, "state" : None, "action" : [], "reward" : [], "done" : False, "finished" : False, "info" : {}, "active" : False}
-        
+        empty_env = {"env": None, "state": None, "action": [], "reward": [],
+                     "done": False, "finished": False, "info": {}, "active": False}
+
         envs = self.config["environments"]
         for env in envs:
-            self.environments[env["id"]] = deepcopy(empty_env) ### Test if deepcopy can be deleted
+            self.environments[env["id"]] = deepcopy(
+                empty_env)  # Test if deepcopy can be deleted
             if env["origin"] == "unity":
                 if env["temporality"] == "episodic":
-                    self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(env["file_path"], env["id"], self.log_path)
+                    self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(
+                        env["file_path"], env["id"], self.log_path)
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
-                    self.environments[env["id"]]["env"] = GymEpisodicEnvironment(env["id"], env["name"], self.log_path)
-            self.environments[env["id"]]["info"] = self.environments[env["id"]]["env"].getEnvironmentInfo()
+                    self.environments[env["id"]]["env"] = GymEpisodicEnvironment(
+                        env["id"], env["name"], self.log_path)
+            self.environments[env["id"]]["info"] = self.environments[env["id"]
+                                                                     ]["env"].get_environment_info()
 
-    def startEnvironmentsEpisodes(self):
+    def start_environments_episodes(self):
         """ Begin the first step of currently active environments. """
-        envs_config= self.config["schedule"]
+        envs_config = self.config["schedule"]
         for env_config in envs_config:
             if env_config["active"]:
                 self.environments[env_config["env"]]["active"] = True
-                self.environments[env_config["env"]]["state"] = self.environments[env_config["env"]]["env"].startEpisodes(env_config["max_episodes"], env_config["max_t"], env_config["success_avg"])
+                self.environments[env_config["env"]]["state"] = self.environments[env_config["env"]]["env"].start_episodes(
+                    env_config["max_episodes"], env_config["max_t"], env_config["success_avg"])
 
-    def runSteps(self):
+    def run_steps(self):
         """ Take one more step in the currently active environments. """
         for _, env in self.environments.items():
             if env["active"]:
@@ -64,11 +71,12 @@ class MetaEnvironment(object):
                 env["done"] = env_output[2]
                 env["finished"] = env_output[3]
 
-    def setAction(self):
+    def set_action(self):
         """ Transports the action information from the information object in this class to inside the environment classes. """
-        [env["env"].setAction(env["action"]) for _, env in self.environments.items()]
+        [env["env"].set_action(env["action"])
+         for _, env in self.environments.items()]
 
-    def closeEnvironments(self):
+    def close_environments(self):
         """ Closes the environments once they are finished. """
         envs = self.config["environments"]
         for env in envs:
