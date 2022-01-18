@@ -1,6 +1,6 @@
 import os
 from distutils import util
-from pynput.keyboard import Key, Listener
+from pynput.keyboard import Listener
 import threading
 from torch.utils.tensorboard import SummaryWriter
 
