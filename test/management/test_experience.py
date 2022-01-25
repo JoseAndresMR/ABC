@@ -96,13 +96,15 @@ class TestExperience(unittest.TestCase):
                 "origin": "gym",
                 "id": "gym0",
                 "temporality": "episodic",
-                "name": "Pendulum-v1"
+                "name": "Pendulum-v1",
+                "use_kb_render" : False
             },
             {
                 "origin": "gym",
                 "id": "gym1",
                 "temporality": "episodic",
-                "name": "Pendulum-v1"
+                "name": "Pendulum-v1",
+                "use_kb_render" : False
             }
         ],
             'schedule': [

@@ -48,7 +48,7 @@ class MetaEnvironment(object):
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = GymEpisodicEnvironment(
-                        env["id"], env["name"], self.log_path)
+                        env["id"], env["name"], self.log_path, env["use_kb_render"])
             self.environments[env["id"]]["info"] = self.environments[env["id"]
                                                                      ]["env"].get_environment_info()
 

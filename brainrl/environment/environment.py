@@ -8,10 +8,11 @@ from torch.utils.tensorboard import SummaryWriter
 class Environment(object):
     """ Parent class for every type of environment. Manages their common information and functions. """
 
-    def __init__(self, id, log_path: str):
+    def __init__(self, id, log_path: str, use_kb_render = False):
         self.render_flag = False
-        keyboard_input_thread = threading.Thread(target=self.keyboard_input_thread_fn)
-        keyboard_input_thread.start()
+        if use_kb_render:
+            keyboard_input_thread = threading.Thread(target=self.keyboard_input_thread_fn)
+            keyboard_input_thread.start()
         self.tensorboard_writer = SummaryWriter(
             os.path.join(log_path, "envs", "{}".format(id)))
 

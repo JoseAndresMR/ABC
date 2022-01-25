@@ -8,8 +8,8 @@ from .environment import Environment
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """
 
-    def __init__(self, id, name, log_path):
-        super().__init__(id, log_path)
+    def __init__(self, id, name, log_path, use_kb_render = False):
+        super().__init__(id, log_path, use_kb_render)
         """ Creates the Gym environment. Gathers Gym specific information structure and presents it as a common ABC frame.
 
         Args:
