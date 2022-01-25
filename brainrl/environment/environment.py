@@ -1,6 +1,5 @@
 import os
 from distutils import util
-from pynput.keyboard import Listener
 import threading
 from torch.utils.tensorboard import SummaryWriter
 
@@ -23,6 +22,7 @@ class Environment(object):
         self.actions = action
 
     def keyboard_input_thread_fn(self):
+        from pynput.keyboard import Listener
         def keyboard_pressed(key):
             if key.char == "r":
                 self.render_flag = not self.render_flag
