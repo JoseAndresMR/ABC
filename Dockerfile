@@ -151,7 +151,8 @@ RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
     widgetsnbextension==3.5.2 \
     wrapt==1.13.3 \
     zipp==3.6.0 \
-    setuptools==59.5.0
+    setuptools==59.5.0 \
+    pynput==1.76
 
 # # Install Torch with CUDA. Tensorflow apparently was not needed
 # RUN pip3 install tensorflow==2.0.0
