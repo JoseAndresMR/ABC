@@ -12,6 +12,7 @@ RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
 # Install Python 3.7
 RUN apt-get -y update && apt-get -y install \
     python3.7 \
+    python3.7-dev \
     python3-pip \
     swig
 
