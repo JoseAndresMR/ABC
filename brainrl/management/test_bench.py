@@ -94,8 +94,8 @@ class TestBench(object):
                         "path" : stack["path"] + [variable],
                         "suggested_values" : suggested_values
                     }
-            study = optuna.create_study(direction='minimize')
-            study.optimize(objective, n_trials=15)
+            study = optuna.create_study(direction='maximize')
+            study.optimize(objective, n_trials=100)
             study.best_params  # E.g. {'x': 2.002108042}
             print(study.best_params)
             i += 1

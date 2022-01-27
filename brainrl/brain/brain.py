@@ -111,7 +111,7 @@ class Brain(object):
             neuron["action"] = neuron["neuron"].output_value
         self.forward_step += 1
         if self.forward_step % 5000 == 0:
-            self.makePlots()
+            self.make_plots()
 
     def run_attention_field_step(self, stage: int):
         """ Compute attention weights in two possible stages.

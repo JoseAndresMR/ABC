@@ -81,7 +81,7 @@ class MetaEnvironment(object):
         envs = self.config["environments"]
         for env in envs:
             if self.environments[env["id"]]["finished"]:
-                self.environments[env["id"]]["env"].finishEnvironment()
+                self.environments[env["id"]]["env"].finish_environment()
                 self.environments.pop(env["id"])
 
         return not bool(self.environments)

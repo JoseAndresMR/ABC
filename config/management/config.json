@@ -15,9 +15,13 @@
             "type" : "grid_search",
             "values": [
                 {
-                    "prefix": "prefix_",
+                    "prefix": "definition_",
                     "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "metaparameters"],
                     "values": {
+                        "gamma": [
+                            0.95,
+                            0.99
+                        ],
                         "tau": [
                             0.01,
                             0.02
@@ -29,6 +33,46 @@
                         "lr_critic": [
                             0.002,
                             0.004
+                        ]
+                    }
+                },
+                {
+                    "prefix": "actor_model_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "models","actor","layers",1],
+                    "values": {
+                        "size": [
+                            80,
+                            400
+                        ]
+                    }
+                },
+                {
+                    "prefix": "critic_model_1_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "models","critic","layers",1],
+                    "values": {
+                        "size": [
+                            80,
+                            400
+                        ]
+                    }
+                },
+                {
+                    "prefix": "critic_model_2_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "models","critic","layers",2],
+                    "values": {
+                        "size": [
+                            80,
+                            200
+                        ]
+                    }
+                },
+                {
+                    "prefix": "critic_model_3_",
+                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "models","critic","layers",3],
+                    "values": {
+                        "size": [
+                            80,
+                            200
                         ]
                     }
                 }
