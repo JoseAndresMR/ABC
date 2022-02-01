@@ -212,6 +212,7 @@ class Brain(object):
                                            np.mean(self.scores_deque),
                                            self.forward_step)
         neuron_rewards_df = pd.DataFrame([neuron["reward"] for neuron in self.neurons["all"]])
+        print(neuron_rewards_df)
 
         sns.heatmap( data = neuron_rewards_df, vmin=0, vmax=1.0)
         # fig, ax = plt.subplots()
