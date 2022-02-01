@@ -111,7 +111,7 @@ class Brain(object):
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
         self.forward_step += 1
-        if self.forward_step % 500 == 0:
+        if self.forward_step % 50 == 0:
             self.make_plots()
 
     def run_attention_field_step(self, stage: int):
@@ -213,7 +213,7 @@ class Brain(object):
                                            self.forward_step)
         neuron_rewards_df = pd.DataFrame([neuron["reward"] for neuron in self.neurons["all"]])
 
-        sns.heatmap( data = df, vmin=0, vmax=1.0)
+        sns.heatmap( data = neuron_rewards_df, vmin=0, vmax=1.0)
         # fig, ax = plt.subplots()
         attention_heatmap_df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
                             index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
