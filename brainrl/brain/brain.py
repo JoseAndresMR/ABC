@@ -56,6 +56,7 @@ class Brain(object):
         self.scores_deque = deque(maxlen=1000)
         self.scores = []
         self.performance = -99999
+        self.start_plots()
 
     def spawn_neurons(self):
         """ Batch initialisation of all kinds of neurons. TODO: dynamically spawn during the development of the experience. """
@@ -96,13 +97,13 @@ class Brain(object):
             [neuron["neuron"].backprop() for neuron in self.neurons["sensory"]]
         [neuron["neuron"].forward() for neuron in self.neurons["sensory"]]
         if len(self.neurons["intern"]) > 0:
-            self.runAttentionFieldStep(1)
+            self.run_attention_field_step(1)
             if self.forward_step > 0:
                 [neuron["neuron"].backprop()
                  for neuron in self.neurons["intern"]]
             [neuron["neuron"].forward() for neuron in self.neurons["intern"]]
         if len(self.neurons["motor"]) > 0:
-            self.runAttentionFieldStep(2)
+            self.run_attention_field_step(2)
         if self.forward_step > 0:
             [neuron["neuron"].backprop()
              for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
@@ -110,7 +111,7 @@ class Brain(object):
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
         self.forward_step += 1
-        if self.forward_step % 5000 == 0:
+        if self.forward_step % 500 == 0:
             self.make_plots()
 
     def run_attention_field_step(self, stage: int):
@@ -176,7 +177,7 @@ class Brain(object):
         for i, split_reward in enumerate(split_rewards):
             if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"]:
                 if len(neurons[i]["reward"]) == 0:
-                    neurons[i]["reward"] = split_reward
+                    neurons[i]["reward"] = [split_reward]
                 else:
                     neurons[i]["reward"] += split_reward
                 if neurons[i]["neuron"].neuron_type != "sensory":
@@ -186,27 +187,41 @@ class Brain(object):
     def get_performance(self):
         return self.performance
 
+    def start_plots(self):
+        ### Attention heatmap
+        self.attention_heatmap_fig = plt.figure()
+        self.attention_heatmap_ax = self.attention_heatmap_fig.add_subplot(111)
+        self.attention_heatmap_ax.set_xlabel('AttendeDs: Sensory (1-{}) and Intern ({}-{})'.format(len(self.neurons["sensory"]),
+                                                                        len(self.neurons["sensory"])+1,
+                                                                        len(self.neurons["all"])-len(self.neurons["motor"])))
+        self.attention_heatmap_ax.set_ylabel('AttendeRs: Intern ({}-{}) and Motor ({}-{})'.format(len(self.neurons["sensory"])+1,
+                                                                        len(self.neurons["all"])-len(self.neurons["motor"]),
+                                                                        len(self.neurons["all"])-len(self.neurons["motor"])+1,
+                                                                        len(self.neurons["all"])))
+        self.attention_heatmap_ax.set_title("Brain: Full Attention field")
+
+        ### Neuron rewards
+        self.neuron_reward_fig = plt.figure()
+        self.neuron_reward_ax = self.neuron_reward_fig.add_subplot(111)
+
     def make_plots(self):
         """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
-
+        plt.clf()
         # Reward scalar
         self.tensorboard_writer.add_scalar('avg_score',
                                            np.mean(self.scores_deque),
                                            self.forward_step)
-        # Attention heatmap. TODO: to tensorboard
+        neuron_rewards_df = pd.DataFrame([neuron["reward"] for neuron in self.neurons["all"]])
+
+        sns.heatmap( data = df, vmin=0, vmax=1.0)
         # fig, ax = plt.subplots()
-        # df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
-        #                     index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
-        #                     columns=range(1,len(self.neurons["all"])-len(self.neurons["motor"])+1))
-        # sns.heatmap(df, vmin=0, vmax=1.0)
-        # plt.xlabel('AttendeDs: Sensory (1-{}) and Intern ({}-{})'.format(len(self.neurons["sensory"]),
-        #                                                                 len(self.neurons["sensory"])+1,
-        #                                                                 len(self.neurons["all"])-len(self.neurons["motor"])))
-        # plt.ylabel('AttendeRs: Intern ({}-{}) and Motor ({}-{})'.format(len(self.neurons["sensory"])+1,
-        #                                                                 len(self.neurons["all"])-len(self.neurons["motor"]),
-        #                                                                 len(self.neurons["all"])-len(self.neurons["motor"])+1,
-        #                                                                 len(self.neurons["all"])))
-        # plt.title("Brain: Full Attention field")
+        attention_heatmap_df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
+                            index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
+                            columns=range(1,len(self.neurons["all"])-len(self.neurons["motor"])+1))
+        # sns.heatmap( data = pd.DataFrame(), ax = self.ax, vmin=0, vmax=1.0)
+        sns.heatmap( data = attention_heatmap_df, vmin=0, vmax=1.0)
+        plt.pause(0.1)
+        self.attention_heatmap_fig.canvas.draw()
         # plt.savefig('Attention.png')
 
         # 3D Attention Field. TODO: to tensorboard
