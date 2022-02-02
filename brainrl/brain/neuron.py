@@ -42,7 +42,7 @@ class Neuron(object):
         self.config = config
         self.k_dim, self. v_dim, self.environment_signal_size = k_dim, v_dim, environment_signal_size
         self.attended = []
-        self.scores_deque = deque(maxlen=1000)
+        self.scores_deque = deque(maxlen=100)
         self.scores = []
         self.tensorboard_writer = SummaryWriter(os.path.join(
             log_path, "neurons", "{}".format(self.config["ID"])))
