@@ -113,6 +113,8 @@ class Neuron(object):
 
         if reward == []:
             reward = self.no_reward_penalty
+        elif isinstance(reward, list):
+            reward = reward[0]
         self.reward = reward
         self.scores_deque.append(reward)
         self.scores.append(reward)

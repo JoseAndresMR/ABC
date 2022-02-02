@@ -1,3 +1,4 @@
+from torch import alpha_dropout
 from .attention_field import AttentionField
 from .neuron import Neuron
 from torch.utils.tensorboard import SummaryWriter
@@ -111,8 +112,8 @@ class Brain(object):
             neuron["neuron"].forward()
             neuron["action"] = neuron["neuron"].output_value
         self.forward_step += 1
-        if self.forward_step % 500 == 0:
-            self.make_plots()
+        if self.forward_step != 0 and self.forward_step % 500 == 0:
+            self.update_plots()
 
     def run_attention_field_step(self, stage: int):
         """ Compute attention weights in two possible stages.
@@ -205,69 +206,97 @@ class Brain(object):
         #                                                                 len(self.neurons["all"])))
         # self.attention_heatmap_ax.set_title("Brain: Full Attention field")
 
-    def make_plots(self):
+        ### 3D Attention Field
+        # plt.rcParams["legend.fontsize"] = 10
+        self.attention_field_fig = plt.figure(figsize=(80, 60))
+        self.attention_field_ax = self.attention_field_fig.gca(projection="3d")
+        self.attention_field_ax.set_xlim3d(-1.0, 1.0)
+        self.attention_field_ax.set_ylim3d(-1.0, 1.0)
+        self.attention_field_ax.set_zlim3d(-1.0, 1.0)
+        self.attention_field_ax.patch.set_facecolor('#ababab')
+
+    def update_plots(self):
         """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
-        plt.clf()
+        # plt.clf()
         # ### Neuron rewards
         # self.tensorboard_writer.add_scalar('avg_score',
         #                                    np.mean(self.scores_deque),
         #                                    self.forward_step)
+        # self.neuron_reward_ax.cla()  
         # neuron_rewards_df = pd.DataFrame([np.mean(neuron["neuron"].scores_deque) for neuron in self.neurons["all"]])
-        # print(neuron_rewards_df)
-
-        # sns.heatmap( data = neuron_rewards_df, vmin=-10, vmax=0.0)
+        # sns.heatmap( data = neuron_rewards_df, ax = self.neuron_reward_ax, vmin=-10, vmax=0.0)
+        # self.neuron_reward_fig.canvas.draw()
 
         # ### Attention heatmap
+        # self.attention_heatmap_ax.cla()  
         # attention_heatmap_df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
         #                     index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
         #                     columns=range(1,len(self.neurons["all"])-len(self.neurons["motor"])+1))
-        # # sns.heatmap( data = pd.DataFrame(), ax = self.ax, vmin=0, vmax=1.0)
-        # sns.heatmap( data = attention_heatmap_df, vmin=0, vmax=1.0)
+        # # sns.heatmap( data = pd.DataFrame(), ax = self.attention_heatmap_ax, vmin=0, vmax=1.0)
+        # sns.heatmap( data = attention_heatmap_df, ax = self.attention_heatmap_ax, vmin=0, vmax=1.0)
         # self.attention_heatmap_fig.canvas.draw()
         # # # plt.savefig('Attention.png')
 
         ### 3D Attention field
-        plt.rcParams["legend.fontsize"] = 10
-        fig = plt.figure()
-        ax = fig.gca(projection="3d")
-        ax.set_xlim3d(-1.0, 1.0)
-        ax.set_ylim3d(-1.0, 1.0)
-        ax.set_zlim3d(-1.0, 1.0)
+
+        NEURON_POINT_S = 10.0
+        NEURON_LINE_LW = 1.0
+        REWARD_POINT_S = 20.0
+        REWARD_LINE_LW = 5.0
+        REWARD_ALPHA_WINDOW = 20
+
+        self.attention_field_ax.cla()
+        tot_reward_mean = self.scores_deque[-1] / 0.8
+
+        def set_color_and_alpha(value):
+            if value >= 0:
+                color = "yellow"
+            else:
+                color = "red"
+            alpha = np.clip(abs(float(value / REWARD_ALPHA_WINDOW)), 0, 1)
+            return color, alpha
+
 
         for neuron in self.neurons["sensory"]:
             key = neuron["neuron"].key[0]
-            x = list(zip(np.zeros(self.config["attention_field"]["key_dim"]), key))
-            ax.plot(x[0], x[1], x[2], color = "black")
-            ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "green")
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
+            # x = list(zip(np.zeros(self.config["attention_field"]["key_dim"]), key))
+            # ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
+            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
 
         other_neurons = self.neurons["sensory"] + self.neurons["intern"]
         for neuron in self.neurons["intern"]:
             key = neuron["neuron"].key[0]
             query = neuron["neuron"].query[0]
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
             x = list(zip(key, query))
-            ax.plot(x[0], x[1], x[2], color = "black")
-            ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "green")
-            ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "red")
+            self.attention_field_ax.plot(x[0], x[1], x[2], color = "grey", linewidth = NEURON_LINE_LW, alpha = 1.0)
+            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha)
 
             for i, attention in enumerate(neuron["neuron"].attended):
-                if attention > 0.3:
+                if attention > 0.1:
                     key = other_neurons[i]["neuron"].key[0]
                     x = list(zip(key, query))
-                    ax.plot(x[0], x[1], x[2], color = "blue")
+                    self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
 
         for neuron in self.neurons["motor"]:
             query = neuron["neuron"].query[0]
-            x = list(zip(query, np.ones(self.config["attention_field"]["key_dim"])))
-            ax.plot(x[0], x[1], x[2], color = "black")
-            ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "red")
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
+            # x = list(zip(query, np.ones(self.config["attention_field"]["key_dim"])))
+            # ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
+            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
 
             for i, attention in enumerate(neuron["neuron"].attended):
                 if attention > 0.3:
                     key = other_neurons[i]["neuron"].key[0]
                     x = list(zip(key, query))
-                    ax.plot(x[0], x[1], x[2], color = "blue")
+                    self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
 
-        # ax.legend()
-        # plt.title("Brain: 3D Attention Field")
-        # plt.savefig('3D attention field.png')
+        # # ax.legend()
+        # # plt.title("Brain: 3D Attention Field")
+        # # plt.savefig('3D attention field.png')
         plt.pause(0.1)
