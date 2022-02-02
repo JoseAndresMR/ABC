@@ -48,7 +48,7 @@ class MetaEnvironment(object):
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = GymEpisodicEnvironment(
-                        env["id"], env["name"], self.log_path)
+                        env["id"], env["name"], self.log_path, env["use_kb_render"])
             self.environments[env["id"]]["info"] = self.environments[env["id"]
                                                                      ]["env"].get_environment_info()
 
@@ -81,7 +81,7 @@ class MetaEnvironment(object):
         envs = self.config["environments"]
         for env in envs:
             if self.environments[env["id"]]["finished"]:
-                self.environments[env["id"]]["env"].finishEnvironment()
+                self.environments[env["id"]]["env"].finish_environment()
                 self.environments.pop(env["id"])
 
         return not bool(self.environments)
