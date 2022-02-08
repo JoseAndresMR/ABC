@@ -105,6 +105,6 @@ class TestBench(object):
                     }
             study = optuna.create_study(direction= experiment_config["optim_dir"])
             study.optimize(objective, n_trials= experiment_config["n_trials"])
-            study.best_params  # E.g. {'x': 2.002108042}
+            study.best_params
             print(study.best_params)
             i += 1

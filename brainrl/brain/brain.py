@@ -54,7 +54,7 @@ class Brain(object):
         self.forward_step = 0
         self.tensorboard_writer = SummaryWriter(self.log_path)
 
-        self.scores_deque = deque(maxlen=1000)
+        self.tot_reward_deques = {"sensory" : deque(maxlen=100), "intern" : deque(maxlen=100), "motor" : deque(maxlen=100)}
         self.scores = []
         self.performance = -99999
         self.start_plots()
@@ -138,7 +138,7 @@ class Brain(object):
                 self.attention_field.add_entries(
                     neuron["neuron"].query, None, None)
 
-        values, attended = self.attention_field.run_step()
+        values, attended = self.attention_field.run_step(stage)
         if stage == 1:
             neurons = self.neurons["intern"]
         elif stage == 2:
@@ -146,6 +146,7 @@ class Brain(object):
         for i, value in enumerate(values):
             neurons[i]["neuron"].set_next_input_value(np.array([value]))
             neurons[i]["neuron"].attended = attended[i]
+            neurons[i]["neuron"].compute_attention_metric()
 
     def set_state_and_reward(self):
         """ Transports the state and reward information from the information object in this class to inside each neurons' class
@@ -161,35 +162,45 @@ class Brain(object):
         [neuron["neuron"].set_reward(np.array(neuron["reward"]).mean(
         )) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]
 
-        self.scores_deque.append(np.array([np.array(neuron["reward"]).mean(
-        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
-        self.scores.append(np.array([np.array(neuron["reward"]).mean(
-        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
-        self.performance = np.mean(self.scores_deque)
+        self.compute_metrics()
 
         for neuron in self.neurons["all"]:
             neuron["reward"] = []
 
-    def allocate_reward(self, reward, attendeds):
+    def allocate_reward(self, reward, attendeds : list, stream_history = []):
         """ Split or backpropagate the reward given the attention weights each agent used to definde its state. """
         split_rewards = np.array(attendeds) * reward
         neurons = self.neurons["sensory"] + self.neurons["intern"]
 
         for i, split_reward in enumerate(split_rewards):
-            if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"]:
+            if abs(split_reward) > self.config["attention_field"]["reward_backprop_thr"] and i not in stream_history:
                 if len(neurons[i]["reward"]) == 0:
                     neurons[i]["reward"] = [split_reward]
                 else:
                     neurons[i]["reward"] += split_reward
                 if neurons[i]["neuron"].neuron_type != "sensory":
-                    self.allocate_reward(
-                        split_reward, neurons[i]["neuron"].attended)
+                    own_stream_history = copy.deepcopy(stream_history)
+                    own_stream_history.append(i)
+                    self.allocate_reward( split_reward, neurons[i]["neuron"].attended, own_stream_history)
+
+    def compute_metrics(self):
+        """ Define metric about reward spreading """
+        self.tot_reward_deques["motor"].append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        self.scores.append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["sensory-motor"] + self.neurons["motor"]]).sum())
+        self.performance = np.mean(self.tot_reward_deques["motor"])
+        self.tot_reward_deques["intern"].append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["intern"]]).sum())
+        self.tot_reward_deques["sensory"].append(np.array([np.array(neuron["reward"]).mean(
+        ) for neuron in self.neurons["sensory"]]).sum())
+        self.reward_percentaje_to_sensory_agents = list(self.tot_reward_deques["sensory"])[-1]/(list(self.tot_reward_deques["motor"])[-1])
 
     def get_performance(self):
         return self.performance
 
     def start_plots(self):
-
+        """ Start figures for different graphics: neurons rewrds, attention heatmaps and 3D attention field """
         # ### Neuron rewards
         # self.neuron_reward_fig = plt.figure()
         # self.neuron_reward_ax = self.neuron_reward_fig.add_subplot(111)
@@ -213,14 +224,14 @@ class Brain(object):
         self.attention_field_ax.set_xlim3d(-1.0, 1.0)
         self.attention_field_ax.set_ylim3d(-1.0, 1.0)
         self.attention_field_ax.set_zlim3d(-1.0, 1.0)
-        self.attention_field_ax.patch.set_facecolor('#ababab')
+        # self.attention_field_ax.patch.set_facecolor()
 
     def update_plots(self):
-        """ Different visualizations about performance and attention. TODO: Add attention heatmap and 3D plot to tensorboard """
+        """ Update visualizations about performance and attention: neurons rewrds, attention heatmaps and 3D attention field """
         # plt.clf()
         # ### Neuron rewards
         # self.tensorboard_writer.add_scalar('avg_score',
-        #                                    np.mean(self.scores_deque),
+        #                                    np.mean(self.tot_reward_deques["motor"]),
         #                                    self.forward_step)
         # self.neuron_reward_ax.cla()  
         # neuron_rewards_df = pd.DataFrame([np.mean(neuron["neuron"].scores_deque) for neuron in self.neurons["all"]])
@@ -239,14 +250,15 @@ class Brain(object):
 
         ### 3D Attention field
 
-        NEURON_POINT_S = 10.0
+        NEURON_POINT_S = 30.0
         NEURON_LINE_LW = 1.0
-        REWARD_POINT_S = 20.0
+        REWARD_POINT_S = 50.0
         REWARD_LINE_LW = 5.0
         REWARD_ALPHA_WINDOW = 20
 
         self.attention_field_ax.cla()
-        tot_reward_mean = self.scores_deque[-1] / 0.8
+        if self.tot_reward_deques["motor"]:
+            tot_reward_mean = self.tot_reward_deques["motor"][-1] / 0.8
 
         def set_color_and_alpha(value):
             if value >= 0:
@@ -272,8 +284,8 @@ class Brain(object):
             color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
             x = list(zip(key, query))
             self.attention_field_ax.plot(x[0], x[1], x[2], color = "grey", linewidth = NEURON_LINE_LW, alpha = 1.0)
-            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
-            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "blue", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "green", s = NEURON_POINT_S, alpha = 1.0)
             self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha)
 
             for i, attention in enumerate(neuron["neuron"].attended):
@@ -287,7 +299,7 @@ class Brain(object):
             color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
             # x = list(zip(query, np.ones(self.config["attention_field"]["key_dim"])))
             # ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
-            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "grey", s = NEURON_POINT_S, alpha = 1.0)
             self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
 
             for i, attention in enumerate(neuron["neuron"].attended):

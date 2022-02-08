@@ -143,6 +143,10 @@ class Neuron(object):
         self.state = self.next_state
         self.next_state = None
 
+    def compute_attention_metric(self):
+        """ Calculate dispersion index"""
+        return self.neuron_type, np.std(self.attended)/len(self.attended) # Index of dispersion
+
     def decompose_action(self):
         """ Split the outcome of the RL agent into the pieces of the attention mechanism. """
 

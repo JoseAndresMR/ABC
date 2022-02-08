@@ -113,10 +113,10 @@ class TestBrain(unittest.TestCase):
                       log_path='')
         self.assertTrue(brain.get_performance()==-99999)
 
-    def test_make_plots(self):
+    def test_update_plots(self):
         brain = Brain(config=self.get_config(),
                       log_path='')
-        brain.make_plots()
+        brain.update_plots()
 
 
 if __name__ == '__main__':
