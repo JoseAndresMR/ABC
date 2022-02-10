@@ -3,6 +3,7 @@
         "origin": "gym",
         "id": "gym",
         "temporality": "episodic",
-        "name": "Pendulum-v1"
+        "name": "Pendulum-v1",
+        "use_kb_render" : false
     }
 ]

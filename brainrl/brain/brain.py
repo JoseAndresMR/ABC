@@ -115,6 +115,7 @@ class Brain(object):
         if self.forward_step != 0 and self.forward_step % 500 == 0:
             self.update_plots()
 
+
     def run_attention_field_step(self, stage: int):
         """ Compute attention weights in two possible stages.
         First attention us run sensory -> intern and later (sensory, intern) -> motor. """

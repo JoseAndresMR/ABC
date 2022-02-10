@@ -8,8 +8,8 @@ from .environment import Environment
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """
 
-    def __init__(self, id, name, log_path):
-        super().__init__(id, log_path)
+    def __init__(self, id, name, log_path, use_kb_render = False):
+        super().__init__(id, log_path, use_kb_render)
         """ Creates the Gym environment. Gathers Gym specific information structure and presents it as a common ABC frame.
 
         Args:
@@ -81,8 +81,9 @@ class GymEpisodicEnvironment(Environment):
             if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
                 self.actions = np.argmax(self.actions)
             observation, reward, done, info = self.env.step(self.actions[0])
-            # if self.current_episode >= 1000:
-            #     self.env.render()
+
+            if self.render_flag:
+                self.env.render()
             self.states = np.array([observation])
             self.e_scores += [reward]
             self.current_t += 1
@@ -102,7 +103,7 @@ class GymEpisodicEnvironment(Environment):
             self.scores_deque.append(avg_score)
             self.scores.append(avg_score)
             print('\rEpisode {:d}\tscore: {:.2f}\taverage score over the last 10 episodes: {:.2f}'.format(
-                self.current_episode, self.scores_deque[-1], np.mean(list(self.scores_deque)[-10:])), end="")
+                self.current_episode, self.scores_deque[-1], np.mean(list(self.scores_deque)[-10:])))
             if self.current_episode > 10 and np.mean(self.scores_deque) > self.success_avg:
                 print('\nEnvironment solved in {:d} episodes!\tAverage Score: {:.2f}'.format(
                     self.current_episode-100, np.mean(self.scores_deque)))
