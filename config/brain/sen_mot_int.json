@@ -31,7 +31,7 @@
             ]
         },
         "intern" : {
-            "quantity": 1,
+            "quantity": 2,
             "agent" : {
                 "type" : "DDPG",
                 "definition" : "brain/rl_agents/predefined_agents/ddpg_1_optim.json",

@@ -2,6 +2,8 @@ from genericpath import exists
 import unittest
 import os
 import numpy as np
+import pathlib
+
 
 from brainrl.management.experience import Experience
 
@@ -10,72 +12,70 @@ class TestExperience(unittest.TestCase):
     @staticmethod
     def get_config():
         return {'brain': {
-            "neurons": {
-                "sensory-motor": {
-                    "neurons": [
+            "neurons" : {
+                "sensory" : {
+                    "neurons" : [
                         {
-                            "agent": {
-                                "type": "DDPG",
-                                "additional_dim": [
-                                    3,
-                                    1
-                                ],
-                                "definition": {
-                                    "metaparameters": {
-                                        "buffer_size": 100000,
-                                        "batch_size": 256,
-                                        "gamma": 0.99,
-                                        "tau": 0.01,
-                                        "lr_actor": 0.002,
-                                        "lr_critic": 0.002,
-                                        "learn_every": 4,
-                                        "learn_steps": 2
+                            "agent" : {
+                                "type" : "DDPG",
+                                "additional_dim" : 3,
+                                "definition" : {
+                                "metaparameters":
+                                    {
+                                        "buffer_size" : 100000,
+                                        "batch_size" : 256,
+                                        "gamma" : 0.9853,
+                                        "tau" : 0.0122,
+                                        "lr_actor" : 0.00263,
+                                        "lr_critic" : 0.00323,
+                                        "learn_every" : 4,
+                                        "learn_steps" : 2
                                     }
                                 },
                                 "models": {
-                                    "actor": {
-                                        "layers": [
+                                    "actor" : {
+                                        "layers" : [
                                             {
-                                                "type": "BatchNorm1d",
-                                                "size": "state"
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": 256,
-                                                "features": ["relu"]
+                                                "type" : "linear",
+                                                "size" : 256,
+                                                "features" : ["relu"]
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": "action",
-                                                "features": ["tanh"]
+                                                "type" : "linear",
+                                                "size" : "action",
+                                                "features" : ["tanh"]
                                             }
                                         ]
                                     },
-                                    "critic": {
-                                        "layers": [
+                                    "critic" : {
+                                        "layers" : [
                                             {
-                                                "type": "BatchNorm1d",
-                                                "size": "state"
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": 256,
-                                                "features": ["leaky_relu"]
+                                                "type" : "linear",
+                                                "size" : 361,
+                                                "features" : ["leaky_relu"]
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": 256,
-                                                "features": ["leaky_relu"],
-                                                "concat": ["action"]
+                                                "type" : "linear",
+                                                "size" : 113,
+                                                "features" : ["leaky_relu"],
+                                                "concat" : ["action"]
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": 128,
-                                                "features": ["leaky_relu"]
+                                                "type" : "linear",
+                                                "size" : 186,
+                                                "features" : ["leaky_relu"]
                                             },
                                             {
-                                                "type": "linear",
-                                                "size": 1
+                                                "type" : "linear",
+                                                "size" : 1
                                             }
                                         ]
                                     }
@@ -83,40 +83,168 @@ class TestExperience(unittest.TestCase):
                             }
                         }
                     ]
+                },
+                "motor" : {
+                    "neurons" : [
+                        {
+                            "agent" : {
+                                "type" : "DDPG",
+                                "additional_dim" : 1,
+                                "definition" : {
+                                    "metaparameters":
+                                    {
+                                        "buffer_size" : 100000,
+                                        "batch_size" : 256,
+                                        "gamma" : 0.9853,
+                                        "tau" : 0.0122,
+                                        "lr_actor" : 0.00263,
+                                        "lr_critic" : 0.00323,
+                                        "learn_every" : 4,
+                                        "learn_steps" : 2
+                                    }
+                                },
+                                "models": {
+                                    "actor" : {
+                                        "layers" : [
+                                            {
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 256,
+                                                "features" : ["relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : "action",
+                                                "features" : ["tanh"]
+                                            }
+                                        ]
+                                    },
+                                    "critic" : {
+                                        "layers" : [
+                                            {
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 361,
+                                                "features" : ["leaky_relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 113,
+                                                "features" : ["leaky_relu"],
+                                                "concat" : ["action"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 186,
+                                                "features" : ["leaky_relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 1
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                "intern" : {
+                    "quantity": 1,
+                    "agent" : {
+                        "type" : "DDPG",
+                        "definition" : {
+                            "metaparameters":
+                            {
+                                "buffer_size" : 100000,
+                                "batch_size" : 256,
+                                "gamma" : 0.9853,
+                                "tau" : 0.0122,
+                                "lr_actor" : 0.00263,
+                                "lr_critic" : 0.00323,
+                                "learn_every" : 4,
+                                "learn_steps" : 2
+                            }
+                        },
+                        "models": {
+                            "actor" : {
+                                "layers" : [
+                                    {
+                                        "type" : "BatchNorm1d",
+                                        "size" : "state"
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 256,
+                                        "features" : ["relu"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : "action",
+                                        "features" : ["tanh"]
+                                    }
+                                ]
+                            },
+                            "critic" : {
+                                "layers" : [
+                                    {
+                                        "type" : "BatchNorm1d",
+                                        "size" : "state"
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 361,
+                                        "features" : ["leaky_relu"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 113,
+                                        "features" : ["leaky_relu"],
+                                        "concat" : ["action"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 186,
+                                        "features" : ["leaky_relu"]
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
-            "attention_field": {
-                "key_dim": 3,
-                "value_dim": 10,
-                "reward_backprop_thr": 0.01
-            }
+            "attention_field":
+                {
+                    "key_dim" : 3,
+                    "value_dim" : 10,
+                    "reward_backprop_thr" : 0.01
+                }
         },
             'envs': [
-            {
-                "origin": "gym",
-                "id": "gym0",
-                "temporality": "episodic",
-                "name": "Pendulum-v1",
-                "use_kb_render" : False
-            },
-            {
-                "origin": "gym",
-                "id": "gym1",
-                "temporality": "episodic",
-                "name": "Pendulum-v1",
-                "use_kb_render" : False
-            }
-        ],
+                {
+                    "origin": "gym",
+                    "id": "gym",
+                    "temporality": "episodic",
+                    "name": "Pendulum-v1",
+                    "use_kb_render" : False
+                }
+            ],
             'schedule': [
             {
-                "env": "gym0",
+                "env": "gym",
                 "active": True,
                 "play_ID": 2,
                 "start_type": "step",
                 "start_value": 0,
-                "max_episodes": 600,
-                "max_t": 3000,
-                "success_avg": -300,
+                "max_episodes": 1000,
+                "max_t": 300000,
+                "success_avg": -150,
                 "signals_map": {
                     "state": [
                         {
@@ -124,7 +252,7 @@ class TestExperience(unittest.TestCase):
                                 1,
                                 3
                             ],
-                            "neuron_type": "sensory-motor",
+                            "neuron_type": "sensory",
                             "neuron": 1,
                             "neuron_input": [
                                 1,
@@ -138,7 +266,7 @@ class TestExperience(unittest.TestCase):
                                 1,
                                 1
                             ],
-                            "neuron_type": "sensory-motor",
+                            "neuron_type": "motor",
                             "neuron": 1,
                             "neuron_output": [
                                 1,
@@ -147,10 +275,6 @@ class TestExperience(unittest.TestCase):
                         }
                     ]
                 }
-            },
-            {
-                "env": "gym1",
-                "active": False
             }
         ]
         }
@@ -159,6 +283,9 @@ class TestExperience(unittest.TestCase):
     def create_log_folder(path=''):
         os.makedirs(os.path.join(path, 'log'),
                     exist_ok=True)
+    @staticmethod
+    def get_log_path():
+        return  os.path.join(pathlib.Path(__file__).parent.parent.resolve(), "data")
 
     def test_instance(self):
         self.create_log_folder()
@@ -170,8 +297,11 @@ class TestExperience(unittest.TestCase):
         self.create_log_folder()
         config = self.get_config()
         exp = Experience(config=config, log_path='log')
-        result = exp.loop(max_iterations=3)
+        result = exp.loop(max_iterations=600)
         self.assertIsInstance(result, int)
+        print(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewrds + attention 500.png")))
+        self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "3D attention field step 500.png")))
+        self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewrds + attention 500.png")))
 
     def test_finish(self):
         self.create_log_folder()

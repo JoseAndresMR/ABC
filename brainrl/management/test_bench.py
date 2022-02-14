@@ -30,21 +30,8 @@ class TestBench(object):
         self.config_path = config_folder_path
         with open(os.path.join(self.config_path,"management",'config.json'), 'r') as j:
             self.base_config = json.load(j)
-        # self.base_config = self.config
         self.log_path = os.path.join(data_folder_path,"runs", self.base_config["id"])
-        # self.configs_paths = {"envs" : os.path.join(os.path.dirname(__file__),"..","environments","configs")}
-        # self.configs_paths["brain"] = os.path.join(os.path.dirname(__file__),"..","brain","configs")
-        # self.configs_paths["schedule"] = os.path.join(os.path.dirname(__file__),"schedule_configs")
-        # self.configs_paths["predefined_agents"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_agents")
-        # self.configs_paths["predefined_models"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_models")
-        # self.base_config = {}
-        # with open(os.path.join(self.configs_paths["envs"],'{}.json'.format(self.config["base_configs"]["envs"])), 'r') as j:
-        #     self.base_config["envs"] = json.load(j)
-        # with open(os.path.join(self.configs_paths["brain"],'{}.json'.format(self.config["base_configs"]["brain"])), 'r') as j:
-        #     self.base_config["brain"] = json.load(j)
-        # with open(os.path.join(self.configs_paths["schedule"],'{}.json'.format(self.config["base_configs"]["schedule"])), 'r') as j:
-        #     self.base_config["schedule"] = json.load(j)
-        
+
         self.expandJsons(self.base_config)
 
     def expandJsons(self, nested_dict, prepath=()):
