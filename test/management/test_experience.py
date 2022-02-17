@@ -299,7 +299,7 @@ class TestExperience(unittest.TestCase):
         exp = Experience(config=config, log_path='log')
         result = exp.loop(max_iterations=600)
         self.assertIsInstance(result, int)
-        print(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewrds + attention 500.png")))
+        print(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewards + attention 500.png")))
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "3D attention field step 500.png")))
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewrds + attention 500.png")))
 
