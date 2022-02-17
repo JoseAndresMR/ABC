@@ -218,7 +218,7 @@ class Brain(object):
 
         ### 3D Attention Field
         # plt.rcParams["legend.fontsize"] = 10
-        self.attention_field_fig = plt.figure(figsize=(80, 60))
+        self.attention_field_fig = plt.figure(figsize=(14, 12))
         self.attention_field_ax = self.attention_field_fig.gca(projection="3d")
         self.attention_field_ax.set_xlim3d(-1.0, 1.0)
         self.attention_field_ax.set_ylim3d(-1.0, 1.0)

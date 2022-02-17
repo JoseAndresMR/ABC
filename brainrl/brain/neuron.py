@@ -105,16 +105,17 @@ class Neuron(object):
         else:
             self.next_state = copy.deepcopy(state)
 
-    def set_reward(self, reward: int):
+    def set_reward(self, reward):
         """ Receive reward from the Brain
 
         Args:
-            reward (int): Reward taken by the agent from the Environment. """
+            reward (int or list): Reward taken by the agent from the Environment. """
 
-        if len(reward) == 0:
-            reward = self.no_reward_penalty
-        elif isinstance(reward, list):
-            reward = reward[0]
+        if isinstance(reward, list):
+            if len(reward) == 0:
+                reward = self.no_reward_penalty
+            else:
+                reward = reward[0]
         self.reward = reward
         self.scores_deque.append(reward)
         self.scores.append(reward)
