@@ -111,7 +111,7 @@ class Neuron(object):
         Args:
             reward (int): Reward taken by the agent from the Environment. """
 
-        if reward == []:
+        if len(reward) == 0:
             reward = self.no_reward_penalty
         elif isinstance(reward, list):
             reward = reward[0]
