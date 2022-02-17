@@ -274,18 +274,9 @@ class Brain(object):
         if self.tot_reward_deques["motor"]:
             tot_reward_mean = self.tot_reward_deques["motor"][-1] / 0.8
 
-        def set_color_and_alpha(value):
-            if value >= 0:
-                color = "yellow"
-            else:
-                color = "red"
-            alpha = np.clip(abs(float(value / REWARD_ALPHA_WINDOW)), 0, 1)
-            return color, alpha
-
-
         for neuron in self.neurons["sensory"]:
             key = neuron["neuron"].key[0]
-            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(np.zeros(self.config["attention_field"]["key_dim"]), key))
             ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
             self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
@@ -295,7 +286,7 @@ class Brain(object):
         for neuron in self.neurons["intern"]:
             key = neuron["neuron"].key[0]
             query = neuron["neuron"].query[0]
-            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(key, query))
             self.attention_field_ax.plot(x[0], x[1], x[2], color = "grey", linewidth = NEURON_LINE_LW, alpha = 1.0)
             self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "blue", s = NEURON_POINT_S, alpha = 1.0)
@@ -310,7 +301,7 @@ class Brain(object):
 
         for neuron in self.neurons["motor"]:
             query = neuron["neuron"].query[0]
-            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1])
+            color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(query, np.ones(self.config["attention_field"]["key_dim"])))
             ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
             self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
@@ -338,3 +329,12 @@ class Brain(object):
         self.attention_field_ax.set_title("Brain: 3D Attention Field")
         self.attention_field_fig.savefig(os.path.join( log_path, '3D attention field step {}.png'.format(self.forward_step)))
         plt.pause(0.01)
+
+
+def set_color_and_alpha(value, REWARD_ALPHA_WINDOW):
+    if value >= 0:
+        color = "yellow"
+    else:
+        color = "red"
+    alpha = np.clip(abs(float(value / REWARD_ALPHA_WINDOW)), 0, 1)
+    return color, alpha
