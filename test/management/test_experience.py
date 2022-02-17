@@ -179,6 +179,14 @@ class TestExperience(unittest.TestCase):
         exp = Experience(config=config, log_path='log')
         exp.finish()
 
+    def test_video(self):
+        self.create_log_folder()
+        config = self.get_config()
+        exp = Experience(config=config, log_path='log')
+        result = exp.loop(max_iterations=3)
+        exp.render()
+        self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "video", "run.mp4")))
+
 
 if __name__ == '__main__':
     unittest.main()
