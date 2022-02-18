@@ -140,6 +140,7 @@ runs/
 
 # Pytest
 events*
+log/
 
 # Files
 *.pdf
