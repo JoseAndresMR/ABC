@@ -24,7 +24,6 @@ In Ubuntu, first you have to prepare `xhost`:
 xhost +
 ```
 
-
 Then, you can run it the version of the docker.
 
 ```
