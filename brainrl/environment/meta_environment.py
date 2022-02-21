@@ -27,6 +27,7 @@ class MetaEnvironment(object):
         self.log_path = log_path
         self.environments = {}
         self.active_envs = 0
+        self.total_episodes_finished = 0
         self.add_environments()
 
     def add_environments(self):
@@ -70,6 +71,8 @@ class MetaEnvironment(object):
                 env["state"] = env_output[1]
                 env["done"] = env_output[2]
                 env["finished"] = env_output[3]
+                if env["done"][0]:
+                    self.total_episodes_finished += 1
 
     def set_action(self):
         """ Transports the action information from the information object in this class to inside the environment classes. """

@@ -106,7 +106,7 @@ def add_matrix_to_target(target_matrix, target_dim, added_matrix):
     Returns:
         target_matrix with added_matrix included
     """
-    if target_matrix == []:
+    if len(target_matrix) == 0:
         target_matrix = added_matrix
     elif target_dim[1] <= target_matrix.shape[1]:
         target_matrix[:, target_dim[0]-1:target_dim[1]] = added_matrix

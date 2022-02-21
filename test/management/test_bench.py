@@ -13,7 +13,7 @@ class TestTestBench(unittest.TestCase):
 
     def test_experiences(self):
         tb = TestBench(config_folder_path='config', data_folder_path='data')  
-        tb.experiences(max_iterations=3, n_trials=5)
+        tb.experiences(max_iterations=2000, n_trials=1)
 
 
 if __name__ == '__main__':

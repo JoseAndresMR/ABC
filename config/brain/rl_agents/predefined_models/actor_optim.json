@@ -1,0 +1,18 @@
+{
+    "layers" : [
+        {
+            "type" : "BatchNorm1d",
+            "size" : "state"
+        },
+        {
+            "type" : "linear",
+            "size" : 118,
+            "features" : ["relu"]
+        },
+        {
+            "type" : "linear",
+            "size" : "action",
+            "features" : ["tanh"]
+        }
+    ]
+}

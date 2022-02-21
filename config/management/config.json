@@ -1,38 +1,22 @@
 {
-    "id": "time",
+    "id": "multi_1",
     "base_configs": {
         "envs": "environment/config_pendulum.json",
-        "brain": "brain/config_pendulum.json",
-        "schedule": "management/schedule/config_pendulum.json"
+        "brain": "brain/sen_mot_int.json",
+        "schedule": "management/schedule/sen_mot.json"
     },
     "experiments": [ 
         {
             "id": 1,
             "config_alterations": {
                 "envs": "environment/config_pendulum.json",
-                "schedule": "management/schedule/config_pendulum.json"
+                "schedule": "management/schedule/sen_mot.json"
             },
             "type" : "grid_search",
-            "values": [
-                {
-                    "prefix": "prefix_",
-                    "path": ["brain", "neurons", "sensory-motor", "neurons", 0, "agent", "definition", "metaparameters"],
-                    "values": {
-                        "tau": [
-                            0.01,
-                            0.02
-                        ],
-                        "lr_actor": [
-                            0.002,
-                            0.004
-                        ],
-                        "lr_critic": [
-                            0.002,
-                            0.004
-                        ]
-                    }
-                }
-            ]
+            "optim_fn" : "avg_reward",
+            "optim_dir" : "maximize",
+            "n_trials" : 1,
+            "values": []
         }
     ]
 }
