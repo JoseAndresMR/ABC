@@ -75,23 +75,3 @@ docker build --pull --rm -f "Dockerfile" -t abc:1.0 "."
 ```
 docker run -it --rm --gpus all --privileged -v $(pwd):/repo abc:1.0 bash
 ```
-
-## Run container with X11 capabilities
-
-In Ubuntu, first you have to prepare `xhost`:
-
-```
-xhost +
-```
-
-Later, you should run the docker with this arguments:
-
-```
-docker run -it --rm --gpus all --privileged -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $(pwd):/repo abc:1.0 bash
-```
-
-After you finish of using the docker, it is a good practice to close `xhost`:
-
-```
-xhost -
-```
