@@ -71,20 +71,23 @@ class Brain(object):
     def spawn_neurons(self):
         """ Batch initialisation of all kinds of neurons. TODO: dynamically spawn during the development of the experience. """
         print("Brain: Spawning neurons")
-        for neuron_type, type_neuron_config in self.config["neurons"].items():
-            if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
-                for neuron_config in type_neuron_config["neurons"]:
-                    neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim,
-                                          self.v_dim, neuron_config["agent"]["additional_dim"])
+        sorted_neuron_types = ["sensory-motor", "sensory", "intern", "motor"]
+        for neuron_type in sorted_neuron_types:
+            if neuron_type in self.config["neurons"].keys():
+                type_neuron_config = self.config["neurons"][neuron_type]
+                if neuron_type == "sensory-motor" or neuron_type == "sensory" or neuron_type == "motor":
+                    for neuron_config in type_neuron_config["neurons"]:
+                        neuron_config["ID"] = len(self.neurons["all"]) + 1
+                        self.spawn_one_neuron(neuron_type, neuron_config, self.k_dim,
+                                            self.v_dim, neuron_config["agent"]["additional_dim"])
 
-            elif neuron_type == "intern":
-                for _ in range(type_neuron_config["quantity"]):
-                    neuron_config = copy.deepcopy(type_neuron_config)
-                    neuron_config.pop("quantity")
-                    neuron_config["ID"] = len(self.neurons["all"]) + 1
-                    self.spawn_one_neuron(
-                        neuron_type, neuron_config, self.k_dim, self.v_dim)
+                elif neuron_type == "intern":
+                    for _ in range(type_neuron_config["quantity"]):
+                        neuron_config = copy.deepcopy(type_neuron_config)
+                        neuron_config.pop("quantity")
+                        neuron_config["ID"] = len(self.neurons["all"]) + 1
+                        self.spawn_one_neuron(
+                            neuron_type, neuron_config, self.k_dim, self.v_dim)
 
     def spawn_one_neuron(self, neuron_type, config, k_dim, v_dim, additional_dim=None):
         """ Creation of a neuron and its inclussion in the management objects. """
@@ -216,14 +219,24 @@ class Brain(object):
         sns.heatmap( data = pd.DataFrame(), ax = self.neuron_reward_ax, vmin=-10, vmax=0.0)
         sns.heatmap( data = pd.DataFrame(), ax = self.attention_heatmap_ax, vmin=0.0, vmax=1.0)
 
-        ### 3D Attention Field
+        ### 3D Attention Field - Rewards
         # plt.rcParams["legend.fontsize"] = 10
-        self.attention_field_fig = plt.figure(figsize=(14, 12))
-        self.attention_field_ax = self.attention_field_fig.gca(projection="3d")
-        self.attention_field_ax.set_xlim3d(-1.0, 1.0)
-        self.attention_field_ax.set_ylim3d(-1.0, 1.0)
-        self.attention_field_ax.set_zlim3d(-1.0, 1.0)
-        self.attention_field_ax.patch.set_facecolor((0.8, 0.8, 0.8))
+        self.attention_field_fig = plt.figure(figsize=plt.figaspect(0.5))
+        self.attention_field_r_ax = self.attention_field_fig.add_subplot(121, projection='3d')
+        self.attention_field_r_ax.set_xlim3d(-1.0, 1.0)
+        self.attention_field_r_ax.set_ylim3d(-1.0, 1.0)
+        self.attention_field_r_ax.set_zlim3d(-1.0, 1.0)
+        self.attention_field_r_ax.patch.set_facecolor((0.8, 0.8, 0.8))
+
+        ### 3D Attention Field - Attention weights
+        # plt.rcParams["legend.fontsize"] = 10
+        # self.attention_field_aw_fig = plt.figure(figsize=(14, 12))
+        self.attention_field_aw_ax = self.attention_field_fig.add_subplot(122, projection='3d')
+        self.attention_field_aw_ax.set_xlim3d(-1.0, 1.0)
+        self.attention_field_aw_ax.set_ylim3d(-1.0, 1.0)
+        self.attention_field_aw_ax.set_zlim3d(-1.0, 1.0)
+        self.attention_field_aw_ax.patch.set_facecolor((0.8, 0.8, 0.8))
+
 
         plt.pause(0.001)
 
@@ -237,30 +250,34 @@ class Brain(object):
                                            self.forward_step)
         neuron_rewards_df = pd.DataFrame([np.mean(neuron["neuron"].scores_deque) for neuron in self.neurons["all"]])
         neuron_rewards_df = neuron_rewards_df.iloc[::-1]
+        yticks_map = {}
+        for i, n in enumerate(self.neurons["all"]):
+            if n["neuron"].neuron_type == "sensory-motor":
+                yticks_map[i] = "sen-mot {}".format(i + 1)
+            elif n["neuron"].neuron_type == "sensory":
+                yticks_map[i] = "sen {}".format(i + 1 - len(self.neurons["sensory-motor"]))
+            elif n["neuron"].neuron_type == "intern":
+                yticks_map[i] = "int {}".format(i + 1 - len(self.neurons["sensory-motor"]) - len(self.neurons["sensory"]))
+            elif n["neuron"].neuron_type == "motor":
+                yticks_map[i] = "mot {}".format(i + 1 - len(self.neurons["sensory-motor"])- len(self.neurons["sensory"]) - len(self.neurons["intern"]))
+        neuron_rewards_df.index = neuron_rewards_df.index.map(yticks_map)
         ax = sns.heatmap( data = neuron_rewards_df, ax = self.neuron_reward_ax, vmin=-10, vmax=0.0, cbar= False)
-        y_label = 'Sensory (1-{}), Intern ({}-{}) and Motor ({}-{})'.format(len(self.neurons["sensory"]),
-                                                                         len(self.neurons["sensory"])+1,
-                                                                         len(self.neurons["all"])-len(self.neurons["motor"]),
-                                                                         len(self.neurons["all"])-len(self.neurons["motor"])+1,
-                                                                         len(self.neurons["all"]))
-        ax.set(title= "Neuron cumulative rewards", xlabel='Accumulated reward', ylabel=y_label)
+
+        ax.set(title= "Neuron cumulative rewards", xlabel='Accumulated reward', ylabel= "Neurons")
+        # ax.set_yticklabels(ax.get_yticks(), rotation = 0)
 
         ### Attention heatmap
         attention_heatmap_df = pd.DataFrame(data=np.array([neuron["neuron"].attended for neuron in self.neurons["intern"] + self.neurons["motor"]]),
-                            index=range(len(self.neurons["sensory"])+1,len(self.neurons["all"])+1),
-                            columns=range(1,len(self.neurons["all"])-len(self.neurons["motor"])+1))
+                            index=range(len(self.neurons["sensory"]),len(self.neurons["all"])),
+                            columns=range(0,len(self.neurons["all"])-len(self.neurons["motor"])))
         attention_heatmap_df = attention_heatmap_df.iloc[::-1]
+        attention_heatmap_df.index = attention_heatmap_df.index.map(yticks_map)
+        attention_heatmap_df.columns = attention_heatmap_df.columns.map(yticks_map)
         ax = sns.heatmap( data = attention_heatmap_df, ax = self.attention_heatmap_ax,  vmin=0, vmax=1.0, cbar= False)
-        x_label = 'AttendeDs: Sensory (1-{}) and Intern ({}-{})'.format(len(self.neurons["sensory"]),
-                                                                        len(self.neurons["sensory"])+1,
-                                                                        len(self.neurons["all"])-len(self.neurons["motor"]))
-        y_label = 'AttendeRs: Intern ({}-{}) and Motor ({}-{})'.format(len(self.neurons["sensory"])+1,
-                                                                        len(self.neurons["all"])-len(self.neurons["motor"]),
-                                                                        len(self.neurons["all"])-len(self.neurons["motor"])+1,
-                                                                        len(self.neurons["all"]))
-        ax.set(title= "Attention heatmap", xlabel= x_label, ylabel= y_label)
+        ax.set(title= "Attention heatmap", xlabel= "Speakers", ylabel= "Listeners")
+        # ax.set_yticklabels(ax.get_yticks(), rotation = 0)
 
-        self.subplot_fig.savefig(os.path.join( log_path, 'Rewrds + attention {}.png'.format(self.forward_step)))
+        self.subplot_fig.savefig(os.path.join( log_path, 'Rewards + attention {}.png'.format(self.forward_step)))
 
         ## 3D Attention field
 
@@ -270,7 +287,8 @@ class Brain(object):
         REWARD_LINE_LW = 5.0
         REWARD_ALPHA_WINDOW = 20
 
-        self.attention_field_ax.cla()
+        self.attention_field_r_ax.cla()
+        self.attention_field_aw_ax.cla()
         if self.tot_reward_deques["motor"]:
             tot_reward_mean = self.tot_reward_deques["motor"][-1] / 0.8
 
@@ -278,9 +296,10 @@ class Brain(object):
             key = neuron["neuron"].key[0]
             color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(np.zeros(self.config["attention_field"]["key_dim"]), key))
-            ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
-            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
-            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
+            self.attention_field_r_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_r_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
+            
+            self.attention_field_aw_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "black", s = NEURON_POINT_S, alpha = 1.0)
 
         other_neurons = self.neurons["sensory"] + self.neurons["intern"]
         for neuron in self.neurons["intern"]:
@@ -288,46 +307,68 @@ class Brain(object):
             query = neuron["neuron"].query[0]
             color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(key, query))
-            self.attention_field_ax.plot(x[0], x[1], x[2], color = "grey", linewidth = NEURON_LINE_LW, alpha = 1.0)
-            self.attention_field_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "blue", s = NEURON_POINT_S, alpha = 1.0)
-            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "green", s = NEURON_POINT_S, alpha = 1.0)
-            self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha)
+            self.attention_field_r_ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
+            self.attention_field_r_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "blue", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_r_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "green", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_r_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha)
+            
+            self.attention_field_aw_ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
+            self.attention_field_aw_ax.scatter3D(key[0], key[1], key[2], marker = "o", color = "blue", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_aw_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "green", s = NEURON_POINT_S, alpha = 1.0)
 
             for i, attention in enumerate(neuron["neuron"].attended):
-                if attention > 0.1:
+                if attention > 0.0:
                     key = other_neurons[i]["neuron"].key[0]
                     x = list(zip(key, query))
-                    self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
+                    self.attention_field_r_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
+                    self.attention_field_aw_ax.plot(x[0], x[1], x[2], color = "blue", linewidth = REWARD_LINE_LW, alpha = attention)
 
         for neuron in self.neurons["motor"]:
             query = neuron["neuron"].query[0]
             color, alpha = set_color_and_alpha(neuron["neuron"].scores_deque[-1], REWARD_ALPHA_WINDOW)
             x = list(zip(query, np.ones(self.config["attention_field"]["key_dim"])))
-            ax.plot(x[0], x[1], x[2], color = "black", linewidth = NEURON_LINE_LW, alpha = 1.0)
-            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
-            self.attention_field_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
+            self.attention_field_r_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+            self.attention_field_r_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = color, s = REWARD_POINT_S, alpha = alpha)
+
+            self.attention_field_aw_ax.scatter3D(query[0], query[1], query[2], marker = "o", color = "white", s = NEURON_POINT_S, alpha = 1.0)
+
 
             for i, attention in enumerate(neuron["neuron"].attended):
-                if attention > 0.3:
+                if attention > 0.0:
                     key = other_neurons[i]["neuron"].key[0]
                     x = list(zip(key, query))
-                    self.attention_field_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
+                    self.attention_field_r_ax.plot(x[0], x[1], x[2], color = color, linewidth = REWARD_LINE_LW, alpha = alpha * attention)
+                    self.attention_field_aw_ax.plot(x[0], x[1], x[2], color = "blue", linewidth = REWARD_LINE_LW, alpha = attention)
 
-        leg = Legend(self.attention_field_ax, [ matplotlib.lines.Line2D(xdata = [], ydata = [], markerfacecolor = "grey"),
+        leg = Legend(self.attention_field_r_ax, [ matplotlib.lines.Line2D(xdata = [], ydata = [], color = "black"),
                                                 mpatches.Patch(facecolor='red', edgecolor='r'),
                                                 mpatches.Patch(facecolor='yellow', edgecolor='r')],
-                                                ['Intern agent','Negative reward', 'Positive reward'], loc='lower right', frameon=False)
-        self.attention_field_ax.add_artist(leg)
-        leg_2 = Legend(self.attention_field_ax, [matplotlib.lines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=10),
+                                                ['Intern agent','Negative reward', 'Positive reward'], loc='lower left', frameon=False)
+        self.attention_field_r_ax.add_artist(leg)
+        leg_2 = Legend(self.attention_field_r_ax, [matplotlib.lines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=10),
                                                 matplotlib.lines.Line2D([], [], color='blue', marker='o', linestyle='None', markersize=10),
                                                 matplotlib.lines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10),
                                                 matplotlib.lines.Line2D([], [], color='white', marker='o', linestyle='None', markersize=10)],
                                                 ['Sensory - Key', 'Intern - Key', 'Intern - Query', 'Motor - Query'], loc='upper right', frameon=False)
-        self.attention_field_ax.add_artist(leg_2)
+        self.attention_field_r_ax.add_artist(leg_2)
 
-        self.attention_field_ax.legend(handles = [])
-        self.attention_field_ax.set_title("Brain: 3D Attention Field")
-        self.attention_field_fig.savefig(os.path.join( log_path, '3D attention field step {}.png'.format(self.forward_step)))
+        self.attention_field_r_ax.legend(handles = [])
+        self.attention_field_r_ax.set_title("Brain: 3D Attention Field - Reward backpropagation")
+
+        leg_3 = Legend(self.attention_field_aw_ax, [ matplotlib.lines.Line2D(xdata = [], ydata = [], color = "black"),
+                                                mpatches.Patch(facecolor='blue', edgecolor='r')],
+                                                ['Intern agent','Attention weights'], loc='lower left', frameon=False)
+        self.attention_field_aw_ax.add_artist(leg_3)
+        leg_4 = Legend(self.attention_field_aw_ax, [matplotlib.lines.Line2D([], [], color='black', marker='o', linestyle='None', markersize=10),
+                                                matplotlib.lines.Line2D([], [], color='blue', marker='o', linestyle='None', markersize=10),
+                                                matplotlib.lines.Line2D([], [], color='green', marker='o', linestyle='None', markersize=10),
+                                                matplotlib.lines.Line2D([], [], color='white', marker='o', linestyle='None', markersize=10)],
+                                                ['Sensory - Key', 'Intern - Key', 'Intern - Query', 'Motor - Query'], loc='upper right', frameon=False)
+        self.attention_field_aw_ax.add_artist(leg_4)
+        self.attention_field_aw_ax.legend(handles = [])
+        self.attention_field_aw_ax.set_title("Brain: 3D Attention Field - Attention weights")
+        self.attention_field_fig.savefig(os.path.join( log_path, '3D attention field step AW {}.png'.format(self.forward_step)))
+
         plt.pause(0.01)
 
 
