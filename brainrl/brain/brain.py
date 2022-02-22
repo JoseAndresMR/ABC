@@ -222,6 +222,7 @@ class Brain(object):
         ### 3D Attention Field - Rewards
         # plt.rcParams["legend.fontsize"] = 10
         self.attention_field_fig = plt.figure(figsize=plt.figaspect(0.5))
+        self.attention_field_fig.suptitle("Brain: 3D Attention field", fontsize=16)
         self.attention_field_r_ax = self.attention_field_fig.add_subplot(121, projection='3d')
         self.attention_field_r_ax.set_xlim3d(-1.0, 1.0)
         self.attention_field_r_ax.set_ylim3d(-1.0, 1.0)
@@ -229,8 +230,6 @@ class Brain(object):
         self.attention_field_r_ax.patch.set_facecolor((0.8, 0.8, 0.8))
 
         ### 3D Attention Field - Attention weights
-        # plt.rcParams["legend.fontsize"] = 10
-        # self.attention_field_aw_fig = plt.figure(figsize=(14, 12))
         self.attention_field_aw_ax = self.attention_field_fig.add_subplot(122, projection='3d')
         self.attention_field_aw_ax.set_xlim3d(-1.0, 1.0)
         self.attention_field_aw_ax.set_ylim3d(-1.0, 1.0)
@@ -353,7 +352,7 @@ class Brain(object):
         self.attention_field_r_ax.add_artist(leg_2)
 
         self.attention_field_r_ax.legend(handles = [])
-        self.attention_field_r_ax.set_title("Brain: 3D Attention Field - Reward backpropagation")
+        self.attention_field_r_ax.set_title("Reward backpropagation")
 
         leg_3 = Legend(self.attention_field_aw_ax, [ matplotlib.lines.Line2D(xdata = [], ydata = [], color = "black"),
                                                 mpatches.Patch(facecolor='blue', edgecolor='r')],
@@ -366,8 +365,8 @@ class Brain(object):
                                                 ['Sensory - Key', 'Intern - Key', 'Intern - Query', 'Motor - Query'], loc='upper right', frameon=False)
         self.attention_field_aw_ax.add_artist(leg_4)
         self.attention_field_aw_ax.legend(handles = [])
-        self.attention_field_aw_ax.set_title("Brain: 3D Attention Field - Attention weights")
-        self.attention_field_fig.savefig(os.path.join( log_path, '3D attention field step AW {}.png'.format(self.forward_step)))
+        self.attention_field_aw_ax.set_title("Attention weights")
+        self.attention_field_fig.savefig(os.path.join( log_path, '3D attention field step {}.png'.format(self.forward_step)))
 
         plt.pause(0.01)
 
