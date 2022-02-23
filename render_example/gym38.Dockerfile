@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.0-base-ubuntu18.04
+FROM nvidia/cuda:11.0-base-ubuntu20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
