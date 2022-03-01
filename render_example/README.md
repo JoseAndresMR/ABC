@@ -1,11 +1,11 @@
 # Example of render
 
 To test how we can obtain the render of an docker, here three test are presented:
-- Python3.9 (it works)
-- Python3.8 (it does not work)
-- Python3.7 (it does not work)
+- Python3.9 (it works).
+- Python3.8 (it works, when installed in Ubuntu20.04).
+- Python3.7 (it works, when installed in Ubuntu20.04. It needs to add an external repository).
 
-`brainrl` library is made in Python3.7, so it may indicate that we should move to python3.9.
+`brainrl` library is made in Python3.7, so it could be kept in Python3.7.
 
 
 ## Build dataset

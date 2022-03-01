@@ -1,12 +1,12 @@
-FROM nvidia/cuda:11.0-base-ubuntu18.04
+FROM nvidia/cuda:11.0-base-ubuntu20.04
 
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
 
 # Install Python 3.7
-RUN apt-get -y update && apt-get -y install \
-    python3.7 \
+RUN apt-get -y update && apt-get install -y software-properties-common && add-apt-repository ppa:deadsnakes/ppa
+RUN apt-get -y update && apt-get -y install python3.7 \
     python3-pip \
     swig \
     python3-opengl
