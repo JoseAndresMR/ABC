@@ -1,5 +1,6 @@
 import gym
 import numpy as np
+import os
 from collections import deque
 import matplotlib.pyplot as plt
 from .environment import Environment
@@ -8,7 +9,7 @@ from .environment import Environment
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """
 
-    def __init__(self, id, name, log_path, use_kb_render = False):
+    def __init__(self, id, name, log_path, use_kb_render = False, mp4_render = True):
         super().__init__(id, log_path, use_kb_render)
         """ Creates the Gym environment. Gathers Gym specific information structure and presents it as a common ABC frame.
 
@@ -17,8 +18,12 @@ class GymEpisodicEnvironment(Environment):
             name (string): name of the environment for Gym.
             log_path (string): Path on disk to store gathered information about the experience  
         """
-
         self.env = gym.make(name)
+        if mp4_render is True:
+            self.env = gym.wrappers.Monitor(env=self.env,
+                                        directory=os.path.join('renders',
+                                                               name),
+                                        force=True)
         observations = self.env.reset()
         state_type = type(self.env.observation_space)
         if state_type == gym.spaces.box.Box:

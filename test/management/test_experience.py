@@ -302,20 +302,14 @@ class TestExperience(unittest.TestCase):
         print(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewards + attention 500.png")))
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "3D attention field step 500.png")))
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewrds + attention 500.png")))
+        name_render = config['envs'][0]['name']
+        self.assertTrue(os.path.isdir(os.path.join("renders", name_render)))
 
     def test_finish(self):
         self.create_log_folder()
         config = self.get_config()
         exp = Experience(config=config, log_path='log')
         exp.finish()
-
-    def test_video(self):
-        self.create_log_folder()
-        config = self.get_config()
-        exp = Experience(config=config, log_path='log')
-        result = exp.loop(max_iterations=3)
-        exp.render()
-        self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "video", "run.mp4")))
 
 
 if __name__ == '__main__':
