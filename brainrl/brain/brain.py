@@ -221,7 +221,7 @@ class Brain(object):
 
         ### 3D Attention Field - Rewards
         # plt.rcParams["legend.fontsize"] = 10
-        self.attention_field_fig = plt.figure(figsize=plt.figaspect(0.5))
+        self.attention_field_fig = plt.figure(figsize=2 * plt.figaspect(0.5))
         self.attention_field_fig.suptitle("Brain: 3D Attention field", fontsize=16)
         self.attention_field_r_ax = self.attention_field_fig.add_subplot(121, projection='3d')
         self.attention_field_r_ax.set_xlim3d(-1.0, 1.0)
