@@ -15,7 +15,8 @@ RUN apt-get -y update && apt-get -y install \
     python3.7-dev \
     python3-pip \
     swig \
-    python3-opengl
+    python3-opengl \
+    ffmpeg
 
 # Install Python libraries with pip
 RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
