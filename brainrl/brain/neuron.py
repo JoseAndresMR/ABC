@@ -111,7 +111,7 @@ class Neuron(object):
         Args:
             reward (int or list): Reward taken by the agent from the Environment. """
 
-        if isinstance(reward, list):
+        if isinstance(reward, list) or isinstance(reward, np.ndarray):
             if len(reward) == 0:
                 reward = self.no_reward_penalty
             else:
