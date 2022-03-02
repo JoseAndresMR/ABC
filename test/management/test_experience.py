@@ -334,7 +334,8 @@ class TestExperience(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join('renders',
                                                     name_render,
                                                     'gym-episode-0.mp4')))
-        shutil.rmtree(os.path.join('renders', name_render))
+        # This line get exception, since Wrapper tries to remove .json
+        # shutil.rmtree(os.path.join('renders', name_render))
 
 
 if __name__ == '__main__':

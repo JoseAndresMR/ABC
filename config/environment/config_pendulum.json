@@ -4,6 +4,7 @@
         "id": "gym",
         "temporality": "episodic",
         "name": "Pendulum-v1",
-        "use_kb_render" : false
+        "use_kb_render" : false,
+        "render_mp4": {"active": false}
     }
 ]
