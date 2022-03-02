@@ -20,7 +20,7 @@ class TestGymEpisodicEnvironment(unittest.TestCase):
         self.create_log_folder()
         env = GymEpisodicEnvironment(id='gym', log_path='log', name="Pendulum-v1")
         action = [env.env.action_space.sample()]  # It needs an extra dimension
-        env.start_episodes()
+        env.start_episodes(n_episodes=1000)
         env.set_action(action)
         env.step()
 
