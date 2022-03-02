@@ -9,21 +9,29 @@ from .environment import Environment
 class GymEpisodicEnvironment(Environment):
     """ OpenAI Gym, episodic environment. """
 
-    def __init__(self, id, name, log_path, use_kb_render = False, mp4_render = True):
+    def __init__(self, id, name, log_path: str, use_kb_render=False, render_mp4={'active': False}):
         super().__init__(id, log_path, use_kb_render)
         """ Creates the Gym environment. Gathers Gym specific information structure and presents it as a common ABC frame.
 
         Args:
             id (string): unique identification in the whole experience.
             name (string): name of the environment for Gym.
-            log_path (string): Path on disk to store gathered information about the experience  
+            log_path (string): Path on disk to store gathered information about the experience.
+            render_mp4 (dict): dictionary of configuration of mp4 render with the following keys:
+                - active (boolean): whether render is active or not.
+                    If active = False, no other keys are taken into account.
+                - render_path (str): where to save the mp4.
         """
         self.env = gym.make(name)
-        if mp4_render is True:
+        if render_mp4['active'] is True:  # render_mp4['active'] is True
+            self.render_flag = True
+            self.render_path = render_mp4['render_path']
             self.env = gym.wrappers.Monitor(env=self.env,
-                                        directory=os.path.join('renders',
-                                                               name),
-                                        force=True)
+                                            directory=os.path.join(self.render_path,
+                                                                   name),
+                                            force=True,
+                                            uid=id)
+            # self.env.enabled, observations = False, self.env.reset()  # Before a 
         observations = self.env.reset()
         state_type = type(self.env.observation_space)
         if state_type == gym.spaces.box.Box:
@@ -38,10 +46,12 @@ class GymEpisodicEnvironment(Environment):
             action_size = self.env.action_space.n
 
         print("Environment: Starting Gym Environment called {}".format(name))
-        print("Environment: State type: {}. State size: {}".format(state_type, state_size))
-        print("Environment: Action type: {}. Action size: {}".format(action_type, action_size))
+        print("Environment: State type: {}. State size: {}".format(
+            state_type, state_size))
+        print("Environment: Action type: {}. Action size: {}".format(
+            action_type, action_size))
 
-        self.env_info = {"num_agents" : 1,
+        self.env_info = {"num_agents": 1,
                          "state_type": state_type,
                          "state_size": state_size,
                          "action_size": action_size,
@@ -57,9 +67,10 @@ class GymEpisodicEnvironment(Environment):
             success_avg (int): boundary that determines when the performance is good enough and the stack finishes.
             print_every (int): number of episodes skipped before the log is updated.
         """
-
-        self.n_episodes, self.max_t, self.print_every, self.success_avg = \
-            n_episodes, max_t, print_every, success_avg
+        self.n_episodes = n_episodes
+        self.max_t = max_t
+        self.print_every = print_every
+        self.success_avg = success_avg
         self.current_episode, self.current_t = 0, 0
 
         self.scores_deque = deque(maxlen=self.print_every)

@@ -47,11 +47,14 @@ class MetaEnvironment(object):
             if env["origin"] == "unity":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(
-                        env["file_path"], env["id"], self.log_path)
+                        file_path=env["file_path"],
+                        id=env["id"],
+                        log_path=self.log_path
+                    )
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = GymEpisodicEnvironment(
-                        env["id"], env["name"], self.log_path, env["use_kb_render"])
+                        env["id"], env["name"], self.log_path, env["use_kb_render"], env['render_mp4'])
             self.environments[env["id"]]["info"] = self.environments[env["id"]
                                                                      ]["env"].get_environment_info()
 
