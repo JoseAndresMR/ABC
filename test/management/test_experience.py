@@ -4,8 +4,7 @@ import os
 import shutil
 import numpy as np
 import pathlib
-
-
+from pyglet.canvas.xlib import NoSuchDisplayException
 from brainrl.management.experience import Experience
 
 
@@ -322,12 +321,15 @@ class TestExperience(unittest.TestCase):
             'active': True,
             'render_path': 'renders'
         }
-        exp = Experience(config=config, log_path='log')
-        result = exp.loop(max_iterations=100)
-        name_render = config['envs'][0]['name']
-        self.assertTrue(os.path.isfile(os.path.join('renders',
-                                                    name_render,
-                                                    'gym-episode-0.mp4')))
+        try:
+            exp = Experience(config=config, log_path='log')
+            result = exp.loop(max_iterations=100)
+            name_render = config['envs'][0]['name']
+            self.assertTrue(os.path.isfile(os.path.join('renders',
+                                                        name_render,
+                                                        'gym-episode-0.mp4')))
+        except NoSuchDisplayException:
+            print('\nThere is no display in this test machine\n')
         # This line get exception, since Wrapper tries to remove .json
         # shutil.rmtree(os.path.join('renders', name_render))
 
