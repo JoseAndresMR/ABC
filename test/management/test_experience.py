@@ -1,6 +1,7 @@
 from genericpath import exists
 import unittest
 import os
+import shutil
 import numpy as np
 import pathlib
 
@@ -328,11 +329,12 @@ class TestExperience(unittest.TestCase):
             'render_path': 'renders'
         }
         exp = Experience(config=config, log_path='log')
-        result = exp.loop(max_iterations=250)
+        result = exp.loop(max_iterations=100)
         name_render = config['envs'][0]['name']
         self.assertTrue(os.path.isfile(os.path.join('renders',
                                                     name_render,
-                                                    'openaigym.video.0.gym.video000000.mp4')))
+                                                    'gym-episode-0.mp4')))
+        shutil.rmtree(os.path.join('renders', name_render))
 
 
 if __name__ == '__main__':

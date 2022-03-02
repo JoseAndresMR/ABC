@@ -26,12 +26,12 @@ class GymEpisodicEnvironment(Environment):
         if render_mp4['active'] is True:  # render_mp4['active'] is True
             self.render_flag = True
             self.render_path = render_mp4['render_path']
-            self.env = gym.wrappers.Monitor(env=self.env,
-                                            directory=os.path.join(self.render_path,
-                                                                   name),
-                                            force=True,
-                                            uid=id)
-            # self.env.enabled, observations = False, self.env.reset()  # Before a 
+            self.env = gym.wrappers.RecordVideo(env=self.env,
+                                                video_folder=os.path.join(self.render_path,
+                                                                          name),
+                                                # force=True,
+                                                name_prefix=id)
+            # self.env.enabled, observations = False, self.env.reset()  # Before a
         observations = self.env.reset()
         state_type = type(self.env.observation_space)
         if state_type == gym.spaces.box.Box:
@@ -88,7 +88,7 @@ class GymEpisodicEnvironment(Environment):
             rewards (list of ints): Used to measure the performance and hence learning.
             observations (list np.arrays): Next state observed by the agent.
             dones (list of bools): Wether the current episode is already finished or not.
-            env_finished (list of bools): Wehter the environment is solved or max episodes reached. 
+            env_finished (list of bools): Wehter the environment is solved or max episodes reached.
         """
 
         episode_finished = False
