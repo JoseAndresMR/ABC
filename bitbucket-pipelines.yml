@@ -10,6 +10,7 @@ pipelines:
             - python3.9 -m pip install pytest
             - python3.9 -m pip install -r requirements.txt
             - python3.9 -m pip install -e .
+            - xhost +
             - pytest
       - step:
           name: python3.7
@@ -19,4 +20,5 @@ pipelines:
             - python3.7 -m pip install pytest
             - python3.7 -m pip install -r requirements.txt
             - python3.7 -m pip install -e .
+            - xhost +
             - pytest
