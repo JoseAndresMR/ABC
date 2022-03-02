@@ -1,7 +1,8 @@
 from brainrl.brain import Brain
 import numpy as np
 import unittest
-
+import os
+import pathlib
 
 class TestBrain(unittest.TestCase):
     @staticmethod
@@ -11,20 +12,21 @@ class TestBrain(unittest.TestCase):
         """
         return {
             "neurons" : {
-                "sensory-motor" : {
+                "sensory" : {
                     "neurons" : [
                         {
                             "agent" : {
                                 "type" : "DDPG",
-                                "additional_dim" : [3,1],
+                                "additional_dim" : 3,
                                 "definition" : {
-                                    "metaparameters": {
+                                "metaparameters":
+                                    {
                                         "buffer_size" : 100000,
                                         "batch_size" : 256,
-                                        "gamma" : 0.99,
-                                        "tau" : 0.01,
-                                        "lr_actor" : 0.002,
-                                        "lr_critic" : 0.002,
+                                        "gamma" : 0.9853,
+                                        "tau" : 0.0122,
+                                        "lr_actor" : 0.00263,
+                                        "lr_critic" : 0.00323,
                                         "learn_every" : 4,
                                         "learn_steps" : 2
                                     }
@@ -56,18 +58,18 @@ class TestBrain(unittest.TestCase):
                                             },
                                             {
                                                 "type" : "linear",
-                                                "size" : 256,
+                                                "size" : 361,
                                                 "features" : ["leaky_relu"]
                                             },
                                             {
                                                 "type" : "linear",
-                                                "size" : 256,
+                                                "size" : 113,
                                                 "features" : ["leaky_relu"],
                                                 "concat" : ["action"]
                                             },
                                             {
                                                 "type" : "linear",
-                                                "size" : 128,
+                                                "size" : 186,
                                                 "features" : ["leaky_relu"]
                                             },
                                             {
@@ -80,6 +82,140 @@ class TestBrain(unittest.TestCase):
                             }
                         }
                     ]
+                },
+                "motor" : {
+                    "neurons" : [
+                        {
+                            "agent" : {
+                                "type" : "DDPG",
+                                "additional_dim" : 1,
+                                "definition" : {
+                                    "metaparameters":
+                                    {
+                                        "buffer_size" : 100000,
+                                        "batch_size" : 256,
+                                        "gamma" : 0.9853,
+                                        "tau" : 0.0122,
+                                        "lr_actor" : 0.00263,
+                                        "lr_critic" : 0.00323,
+                                        "learn_every" : 4,
+                                        "learn_steps" : 2
+                                    }
+                                },
+                                "models": {
+                                    "actor" : {
+                                        "layers" : [
+                                            {
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 256,
+                                                "features" : ["relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : "action",
+                                                "features" : ["tanh"]
+                                            }
+                                        ]
+                                    },
+                                    "critic" : {
+                                        "layers" : [
+                                            {
+                                                "type" : "BatchNorm1d",
+                                                "size" : "state"
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 361,
+                                                "features" : ["leaky_relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 113,
+                                                "features" : ["leaky_relu"],
+                                                "concat" : ["action"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 186,
+                                                "features" : ["leaky_relu"]
+                                            },
+                                            {
+                                                "type" : "linear",
+                                                "size" : 1
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                },
+                "intern" : {
+                    "quantity": 1,
+                    "agent" : {
+                        "type" : "DDPG",
+                        "definition" : {
+                            "metaparameters":
+                            {
+                                "buffer_size" : 100000,
+                                "batch_size" : 256,
+                                "gamma" : 0.9853,
+                                "tau" : 0.0122,
+                                "lr_actor" : 0.00263,
+                                "lr_critic" : 0.00323,
+                                "learn_every" : 4,
+                                "learn_steps" : 2
+                            }
+                        },
+                        "models": {
+                            "actor" : {
+                                "layers" : [
+                                    {
+                                        "type" : "BatchNorm1d",
+                                        "size" : "state"
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 256,
+                                        "features" : ["relu"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : "action",
+                                        "features" : ["tanh"]
+                                    }
+                                ]
+                            },
+                            "critic" : {
+                                "layers" : [
+                                    {
+                                        "type" : "BatchNorm1d",
+                                        "size" : "state"
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 361,
+                                        "features" : ["leaky_relu"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 113,
+                                        "features" : ["leaky_relu"],
+                                        "concat" : ["action"]
+                                    },
+                                    {
+                                        "type" : "linear",
+                                        "size" : 186,
+                                        "features" : ["leaky_relu"]
+                                    }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
             "attention_field":
@@ -90,34 +226,31 @@ class TestBrain(unittest.TestCase):
                 }
         }
 
+    @staticmethod
+    def get_log_path():
+        return  os.path.join(pathlib.Path(__file__).parent.parent.resolve(), "data")
+
     def test_instance(self):
         brain = Brain(config=self.get_config(),
-                       log_path='')
+                       log_path= "data")
         self.assertIsInstance(brain, Brain)
 
     def test_state_and_reward(self):
         brain = Brain(config=self.get_config(),
-                       log_path='')
+                       log_path= "data")
         brain.set_state_and_reward()
 
     def test_forward(self):
         brain = Brain(config=self.get_config(),
-                       log_path='')
-        for neuron in brain.neurons["sensory-motor"]:
-            neuron["state"] = np.random.random((1, 3))
+                       log_path= "data")
+        brain.neurons["sensory"][0]["state"] = np.random.random((1, 3))
         brain.set_state_and_reward()
         brain.forward()
 
     def test_performance(self):
         brain = Brain(config=self.get_config(),
-                      log_path='')
+                      log_path= "data")
         self.assertTrue(brain.get_performance()==-99999)
-
-    def test_make_plots(self):
-        brain = Brain(config=self.get_config(),
-                      log_path='')
-        brain.make_plots()
-
 
 if __name__ == '__main__':
     unittest.main()

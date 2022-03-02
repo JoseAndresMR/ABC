@@ -30,21 +30,8 @@ class TestBench(object):
         self.config_path = config_folder_path
         with open(os.path.join(self.config_path,"management",'config.json'), 'r') as j:
             self.base_config = json.load(j)
-        # self.base_config = self.config
         self.log_path = os.path.join(data_folder_path,"runs", self.base_config["id"])
-        # self.configs_paths = {"envs" : os.path.join(os.path.dirname(__file__),"..","environments","configs")}
-        # self.configs_paths["brain"] = os.path.join(os.path.dirname(__file__),"..","brain","configs")
-        # self.configs_paths["schedule"] = os.path.join(os.path.dirname(__file__),"schedule_configs")
-        # self.configs_paths["predefined_agents"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_agents")
-        # self.configs_paths["predefined_models"] = os.path.join(os.path.dirname(__file__),"..","brain","rl_agents","predefined_models")
-        # self.base_config = {}
-        # with open(os.path.join(self.configs_paths["envs"],'{}.json'.format(self.config["base_configs"]["envs"])), 'r') as j:
-        #     self.base_config["envs"] = json.load(j)
-        # with open(os.path.join(self.configs_paths["brain"],'{}.json'.format(self.config["base_configs"]["brain"])), 'r') as j:
-        #     self.base_config["brain"] = json.load(j)
-        # with open(os.path.join(self.configs_paths["schedule"],'{}.json'.format(self.config["base_configs"]["schedule"])), 'r') as j:
-        #     self.base_config["schedule"] = json.load(j)
-        
+
         self.expandJsons(self.base_config)
 
     def expandJsons(self, nested_dict, prepath=()):
@@ -73,9 +60,18 @@ class TestBench(object):
                     set_value_in_dict_with_path(current_config, variable_params["path"], x)
 
                 exp = Experience(current_config, current_log_path)
-                performance = exp.loop(max_iterations=max_iterations)
+                tol_spins = exp.loop(max_iterations=max_iterations)
+                if experiment_config["optim_fn"] == "tot_spins":
+                    optim_fn = tol_spins
+                elif experiment_config["optim_fn"] == "avg_reward":
+                    optim_fn = exp.brain.get_performance()
+                elif experiment_config["optim_fn"] == "tot_episodes":
+                    optim_fn = exp.meta_environment.total_episodes_finished
+                else:
+                    print("TestBench: optim_fn param not set properly. Value is {}".format(experiment_config["optim_fn"]))
+                    
                 exp.finish()
-                return performance
+                return optim_fn
 
             current_log_path = os.path.join(self.log_path, str(i))
             if os.path.isdir(current_log_path):
@@ -94,8 +90,8 @@ class TestBench(object):
                         "path" : stack["path"] + [variable],
                         "suggested_values" : suggested_values
                     }
-            study = optuna.create_study(direction='minimize')
-            study.optimize(objective, n_trials=15)
-            study.best_params  # E.g. {'x': 2.002108042}
+            study = optuna.create_study(direction= experiment_config["optim_dir"])
+            study.optimize(objective, n_trials= experiment_config["n_trials"])
+            study.best_params
             print(study.best_params)
             i += 1

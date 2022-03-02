@@ -1,4 +1,5 @@
 import math
+from textwrap import wrap
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -16,6 +17,7 @@ class AttentionField(object):
 
         self.k_dim = k_dim
         self.v_dim = v_dim
+        self.self_attention = False
         self.reset_entries()
 
     def add_entries(self, queries, keys, values):
@@ -41,7 +43,7 @@ class AttentionField(object):
                 print("Attention field: keys or values do not have correct shape. Expected {},{} and got {},{}".format(
                     self.k_dim, self.v_dim, keys.shape[1], values.shape[1]))
 
-    def scaled_dot_product(self, q, k, v, mask=None):
+    def scaled_dot_product(self, q, k, v, stage):
         """ Math operation required to calculate the allignment of keys and queries.
 
         Args:
@@ -50,11 +52,14 @@ class AttentionField(object):
             v (int)
             mask (bool): Wether to use a mask in a portion of the result. Not used now. """
 
-        d_k = q.size()[-1]
+        n_q = q.size()[0]
+        n_k = k.size()[0]
         attn_logits = torch.matmul(q, k.transpose(-2, -1))
-        attn_logits = attn_logits / math.sqrt(d_k)
-        if mask is not None:
-            attn_logits = attn_logits.masked_fill(mask == 0, -9e15)
+        attn_logits = attn_logits / math.sqrt(q.size()[-1])
+        if not self.self_attention and stage == 1 and n_k > n_q:
+            diagonal_mask = np.diag(-9999*np.ones(n_q), n_k-n_q)[:n_q]
+            attn_logits = attn_logits + diagonal_mask
+
         self.set_attention = F.softmax(attn_logits, dim=-1)
         self.avg_values = torch.matmul(self.set_attention, v)
 
@@ -65,13 +70,13 @@ class AttentionField(object):
         self.keys = torch.tensor(np.array([]))
         self.values = torch.tensor(np.array([]))
 
-    def run_step(self):
+    def run_step(self, stage):
         """ Calculate the scale dot product and reset attention players.
 
         Returns: 
             avg_values (np.array): Weighted sum of values of attended enurons.
             set_attention (np.array): Attention weights computed for each key neuron. """
 
-        self.scaled_dot_product(self.queries, self.keys, self.values)
+        self.scaled_dot_product(self.queries, self.keys, self.values, stage)
         self.reset_entries()
         return self.avg_values.numpy(), self.set_attention.numpy()

@@ -42,7 +42,7 @@ class Neuron(object):
         self.config = config
         self.k_dim, self. v_dim, self.environment_signal_size = k_dim, v_dim, environment_signal_size
         self.attended = []
-        self.scores_deque = deque(maxlen=1000)
+        self.scores_deque = deque(maxlen=100)
         self.scores = []
         self.tensorboard_writer = SummaryWriter(os.path.join(
             log_path, "neurons", "{}".format(self.config["ID"])))
@@ -105,14 +105,17 @@ class Neuron(object):
         else:
             self.next_state = copy.deepcopy(state)
 
-    def set_reward(self, reward: int):
+    def set_reward(self, reward):
         """ Receive reward from the Brain
 
         Args:
-            reward (int): Reward taken by the agent from the Environment. """
+            reward (int or list): Reward taken by the agent from the Environment. """
 
-        if reward == []:
-            reward = self.no_reward_penalty
+        if isinstance(reward, list):
+            if len(reward) == 0:
+                reward = self.no_reward_penalty
+            else:
+                reward = reward[0]
         self.reward = reward
         self.scores_deque.append(reward)
         self.scores.append(reward)
@@ -140,6 +143,10 @@ class Neuron(object):
                            self.reward], self.next_state, [done])
         self.state = self.next_state
         self.next_state = None
+
+    def compute_attention_metric(self):
+        """ Calculate dispersion index"""
+        return self.neuron_type, np.std(self.attended)/len(self.attended) # Index of dispersion
 
     def decompose_action(self):
         """ Split the outcome of the RL agent into the pieces of the attention mechanism. """
