@@ -7,7 +7,7 @@ from brainrl.brain import Brain
 
 
 class Experience(object):
-    def __init__(self, config, log_path):
+    def __init__(self, config: dict, log_path: str):
         """One timeline exposition of a brain to different environments following a schedule
 
         Args:
@@ -23,7 +23,8 @@ class Experience(object):
         self.meta_environment = MetaEnvironment(config={"environments": config["envs"],
                                                         "schedule": config["schedule"]},
                                                 log_path=log_path)
-        self.brain = Brain(config["brain"], log_path)
+        self.brain = Brain(config=config["brain"],
+                           log_path=log_path)
         self.config = config
 
     def loop(self, max_iterations=999999999999):
@@ -40,8 +41,7 @@ class Experience(object):
                 if spin % 10000 == 0:
                     debug_flag = True
                 self.allocate_environement_output()
-                metaenv_finished = self.meta_environment.close_environments()
-                if metaenv_finished:
+                if self.meta_environment.close_environments():
                     break
                 self.brain.forward()
                 self.allocate_brain_output()
@@ -76,17 +76,19 @@ class Experience(object):
 
     def allocate_brain_output(self):
         """
-        Takes the actions decided by the brain in the information object and maps it into the metaenvionment - environments information object.
+        Takes the actions decided by the brain in the information object
+        and maps it into the metaenvionment - environments information object.
         """
         for env_conf in self.config["schedule"]:
             if env_conf["active"]:
-                for map in env_conf["signals_map"]["action"]:
-                    if self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"].size != 0:
-                        neuron_output = map["neuron_output"]
-                        env_input = map["env_input"]
-                        self.meta_environment.environments[env_conf["env"]]["action"] = add_matrix_to_target(self.meta_environment.environments[env_conf["env"]]["action"],
-                                                                                                             env_input,
-                                                                                                             self.brain.neurons[map["neuron_type"]][map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
+                for signal_map in env_conf["signals_map"]["action"]:
+                    if self.brain.neurons[signal_map["neuron_type"]][signal_map["neuron"]-1]["action"].size != 0:
+                        neuron_output = signal_map["neuron_output"]
+                        env_input = signal_map["env_input"]
+                        self.meta_environment.environments[env_conf["env"]]["action"] = \
+                            add_matrix_to_target(target_matrix=self.meta_environment.environments[env_conf["env"]]["action"],
+                                                 target_dim=env_input,
+                                                 added_matrix=self.brain.neurons[signal_map["neuron_type"]][signal_map["neuron"]-1]["action"][:, neuron_output[0]-1: neuron_output[1]])
         self.meta_environment.set_action()
 
     def finish(self):
