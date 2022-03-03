@@ -5,7 +5,7 @@ pipelines:
           name: python3.9
           image: python:3.9
           script:
-            - apt-get update -y && apt-get install -y swig
+            - apt-get update -y && apt-get install -y swig python3-opengl ffmpeg
             - python3.9 -m pip install -U pip
             - python3.9 -m pip install pytest
             - python3.9 -m pip install -r requirements.txt
@@ -15,6 +15,7 @@ pipelines:
           name: python3.7
           image: python:3.7
           script:
+            - apt-get update -y && apt-get install -y swig swig python3-opengl ffmpeg
             - python3.7 -m pip install -U pip
             - python3.7 -m pip install pytest
             - python3.7 -m pip install -r requirements.txt
