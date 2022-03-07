@@ -1,24 +1,20 @@
-FROM nvidia/cuda:11.0-base-ubuntu18.04
+FROM nvidia/cuda:11.0-base-ubuntu20.04
 
 # Environments
 ARG DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_VISIBLE_DEVICES all
 ENV NVIDIA_DRIVER_CAPABILITIES compute,utility
-CMD nvidia-smi
 
-# Install linux CUDA 11.0
-RUN apt-get update -y && apt-get install -y cuda-nvcc-11-0
-
-# Install Python 3.7
+# Install Python 3.9
 RUN apt-get -y update && apt-get -y install \
-    python3.7 \
-    python3.7-dev \
+    python3.9 \
+    python3.9-dev \
     python3-pip \
     swig \
     python3-opengl
 
 # Install Python libraries with pip
-RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
+RUN python3.9 -m pip install -U --no-cache-dir pip && python3.9 -m \
     pip install --no-cache-dir \
     absl-py==1.0.0 \
     ale-py==0.7.3 \
@@ -158,7 +154,7 @@ RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
 
 # # Install Torch with CUDA. Tensorflow apparently was not needed
 # RUN pip3 install tensorflow==2.0.0
-RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
+RUN python3.9 -m pip install -U --no-cache-dir pip && python3.9 -m \
     pip install --no-cache-dir \
     torch==1.10.0+cu113 \
     torchvision==0.11.1+cu113 \
@@ -169,7 +165,7 @@ RUN python3.7 -m pip install -U --no-cache-dir pip && python3.7 -m \
 # Install library
 ADD . /repo/
 WORKDIR /repo/
-RUN python3.7 -m pip install -e .
+RUN python3.9 -m pip install -e .
 
 VOLUME /repo
 WORKDIR /repo

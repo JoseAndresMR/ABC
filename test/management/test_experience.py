@@ -297,7 +297,7 @@ class TestExperience(unittest.TestCase):
         self.create_log_folder()
         config = self.get_config()
         exp = Experience(config=config, log_path='log')
-        result = exp.loop(max_iterations=600)
+        result = exp.loop(max_iterations=510)
         self.assertIsInstance(result, int)
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "3D attention field step 500.png")))
         self.assertTrue(os.path.isfile(os.path.join(exp.brain.log_path, "plots", "Rewards + attention 500.png")))
