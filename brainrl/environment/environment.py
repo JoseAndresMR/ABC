@@ -8,6 +8,7 @@ class Environment(object):
     """ Parent class for every type of environment. Manages their common information and functions. """
 
     def __init__(self, id, log_path: str, use_kb_render = False):
+        self._id = id
         self.render_flag = False
         if use_kb_render:
             keyboard_input_thread = threading.Thread(target=self.keyboard_input_thread_fn)

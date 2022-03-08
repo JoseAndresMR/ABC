@@ -4,6 +4,7 @@ import os
 from collections import deque
 import matplotlib.pyplot as plt
 from .environment import Environment
+from .render import save_frames_as_mp4
 
 
 class GymEpisodicEnvironment(Environment):
@@ -22,16 +23,18 @@ class GymEpisodicEnvironment(Environment):
                     If active = False, no other keys are taken into account.
                 - render_path (str): where to save the mp4.
         """
+        self.name = name
         self.env = gym.make(name)
-        if render_mp4['active'] is True:  # render_mp4['active'] is True
+        if render_mp4['active'] is True:
             self.render_flag = True
+            self.frames = list()
             self.render_path = render_mp4['render_path']
-            self.env = gym.wrappers.RecordVideo(env=self.env,
-                                                video_folder=os.path.join(self.render_path,
-                                                                          name),
-                                                # force=True,
-                                                name_prefix=id)
-            # self.env.enabled, observations = False, self.env.reset()  # Before a
+            os.makedirs(self.render_path, exist_ok=True)
+            self.batch_episodes = render_mp4['batch_episodes']
+            self.n_episodes_to_render = render_mp4['n_episodes_to_render']
+        else:
+            self.n_episodes_to_render = 0
+            self.batch_episodes = 1
         observations = self.env.reset()
         state_type = type(self.env.observation_space)
         if state_type == gym.spaces.box.Box:
@@ -56,6 +59,12 @@ class GymEpisodicEnvironment(Environment):
                          "state_size": state_size,
                          "action_size": action_size,
                          "action_type": action_type}
+    
+    def condition_render(self):
+        if (self.current_episode % self.batch_episodes) < self.n_episodes_to_render:
+            return True
+        return False
+
 
     def start_episodes(self, n_episodes=1000, max_t=3000, success_avg=30, print_every=50):
         """
@@ -90,7 +99,6 @@ class GymEpisodicEnvironment(Environment):
             dones (list of bools): Wether the current episode is already finished or not.
             env_finished (list of bools): Wehter the environment is solved or max episodes reached.
         """
-
         episode_finished = False
         env_finished = False
         if self.current_t < self.max_t:
@@ -98,8 +106,8 @@ class GymEpisodicEnvironment(Environment):
                 self.actions = np.argmax(self.actions)
             observation, reward, done, info = self.env.step(self.actions[0])
 
-            if self.render_flag:
-                self.env.render()
+            if self.render_flag and self.condition_render():
+                self.frames.append(self.env.render(mode="rgb_array"))
             self.states = np.array([observation])
             self.e_scores += [reward]
             self.current_t += 1
@@ -110,6 +118,12 @@ class GymEpisodicEnvironment(Environment):
             episode_finished = True
 
         if episode_finished:
+            if self.render_flag:
+                save_frames_as_mp4(frames=self.frames,
+                                   path=self.render_path,
+                                   filename='_'.join([self.name,
+                                                      self._id,
+                                                      str(self.current_episode)]))
             self.states = np.array(self.env.reset())
             self.current_episode += 1
             self.current_t = 0

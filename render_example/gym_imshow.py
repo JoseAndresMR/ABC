@@ -7,8 +7,18 @@ from matplotlib import animation
 def unit_render():
     """Just render an image"""
     env = gym.make('CartPole-v0')  # insert your favorite environment
-    def render(): return plt.imshow(env.render(mode='rgb_array'))
+    
+    def render(i):
+        plt.imshow(env.render(mode='rgb_array'))
+        plt.savefig('frame' + str(i))
+        return 
+    
     env.reset()
+
+    for i in range(1000):
+        action = env.action_space.sample()
+        _, _, done, _ = env.step(action)
+        render(i)
     render()
 
 
@@ -33,41 +43,50 @@ def save_frames_as_mp4(frames, path='./', filename='gym_animation.mp4'):
               fps=60)
 
 
-def video_render(episodes=100,
+def video_render(episodes=200,
                  episodes_to_render=[23, 57],
+                 how_much_episodes_to_render=5,
+                 batch_episodes=100,
                  loop_iterations=500):
     # Make gym env
     env = gym.make('Pendulum-v1')
 
+    def condition(n_episode):
+        if (n_episode % batch_episodes) < how_much_episodes_to_render:
+            return True
+        return False
+    os.makedirs('renders', exist_ok=True)
     # Run the env
     observation = env.reset()
-    frames_episodes = dict()
+    # frames_episodes = dict()
     for episode in range(episodes):
-        if episode + 1 in episodes_to_render:
+        if condition(n_episode=episode):
             frames = list()
-        for t in range(loop_iterations):
+        for step in range(loop_iterations):
             # Render to frames buffer
-            if episode + 1 in episodes_to_render:
+            if condition(n_episode=episode):
                 frames.append(env.render(mode="rgb_array"))
             # Take random action
             action = env.action_space.sample()
             _, _, done, _ = env.step(action)
-            print('Episode', episode, ', t =', t)
+            print('Episode', episode, ', t =', step)
             # if done:
             #     print("Episode finished after {} timesteps".format(t + 1))
             #     break
-        if episode + 1 in episodes_to_render:
-            frames_episodes.update({str(episode + 1): frames})
+        if condition(n_episode=episode):
+            save_frames_as_mp4(frames,
+                               path='renders',
+                               filename='gym_animation_' + str(episode) + '.mp4')
+            # frames_episodes.update({str(episode + 1): frames})
     env.close()
 
     # Save frames as mp4
-    os.makedirs('renders', exist_ok=True)
-    for episode, frames in frames_episodes.items():
-        save_frames_as_mp4(frames,
-                           path='renders',
-                           filename='gym_animation_' + episode + '.mp4')
+    # for episode, frames in frames_episodes.items():
+    #     save_frames_as_mp4(frames,
+    #                        path='renders',
+    #                        filename='gym_animation_' + episode + '.mp4')
 
 
 if __name__ == '__main__':
-    unit_render()
+    # unit_render()
     video_render()
