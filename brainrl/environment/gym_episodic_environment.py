@@ -35,7 +35,10 @@ class GymEpisodicEnvironment(Environment):
         else:
             self.n_episodes_to_render = 0
             self.batch_episodes = 1
+        
         observations = self.env.reset()
+        self.observations_shape = observations.shape
+
         state_type = type(self.env.observation_space)
         if state_type == gym.spaces.box.Box:
             state_size = self.env.observation_space.shape
@@ -101,20 +104,20 @@ class GymEpisodicEnvironment(Environment):
         """
         episode_finished = False
         env_finished = False
-        if self.current_t < self.max_t:
-            if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
-                self.actions = np.argmax(self.actions)
-            observation, reward, done, info = self.env.step(self.actions[0])
 
-            if self.render_flag and self.condition_render():
-                self.frames.append(self.env.render(mode="rgb_array"))
-            self.states = np.array([observation])
-            self.e_scores += [reward]
-            self.current_t += 1
-            if done:
-                self.state = None
-                episode_finished = True
-        else:
+        if self.env_info["action_type"] == gym.spaces.discrete.Discrete:
+            self.actions = np.argmax(self.actions)
+        observation, reward, done, info = self.env.step(self.actions[0])
+
+        if self.render_flag and self.condition_render():
+            self.frames.append(self.env.render(mode="rgb_array"))
+        self.states = np.array([observation])
+        self.e_scores += [reward]
+        self.current_t += 1
+        if done:
+            self.state = None
+            episode_finished = True
+        elif self.current_t == self.max_t:
             episode_finished = True
 
         if episode_finished:

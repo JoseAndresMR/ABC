@@ -248,7 +248,7 @@ class TestExperience(unittest.TestCase):
                         'start_type': 'step',
                         'start_value': 0,
                         'max_episodes': 1000,
-                        'max_t': 300000,
+                        'max_t': 100,
                         'success_avg': -150,
                         'signals_map': {
                             'state': [
@@ -325,14 +325,14 @@ class TestExperience(unittest.TestCase):
         }
         try:
             exp = Experience(config=config, log_path='log')
-            result = exp.loop(max_iterations=200)
+            result = exp.loop(max_iterations=200)  # Max_t = 100
             name_render = config['envs'][0]['name']
             self.assertTrue(os.path.isfile(os.path.join('renders',
                                                         'Pendulum-v1_gym_0.mp4')))
+            self.assertTrue(os.path.isfile(os.path.join('renders',
+                                                        'Pendulum-v1_gym_1.mp4')))
         except NoSuchDisplayException:
             print('\nThere is no display in this test machine\n')
-        # This line get exception, since Wrapper tries to remove .json
-        # shutil.rmtree(os.path.join('renders', name_render))
 
 
 if __name__ == '__main__':
