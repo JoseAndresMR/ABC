@@ -14,14 +14,16 @@ class TestMetaEnvironment(unittest.TestCase):
                 "id": "gym0",
                 "temporality": "episodic",
                 "name": "Pendulum-v1",
-                "use_kb_render" : False
+                "use_kb_render" : False,
+                "render_mp4": {"active": False}
             },
             {
                 "origin": "gym",
                 "id": "gym1",
                 "temporality": "episodic",
                 "name": "Pendulum-v1",
-                "use_kb_render" : False
+                "use_kb_render" : False,
+                "render_mp4": {"active": False}
             }
         ],
             'schedule': [

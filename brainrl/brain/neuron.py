@@ -106,10 +106,13 @@ class Neuron(object):
             self.next_state = copy.deepcopy(state)
 
     def set_reward(self, reward):
-        """ Receive reward from the Brain
+        """
+        Receive reward from the Brain.
 
         Args:
-            reward (int or list): Reward taken by the agent from the Environment. """
+            reward (int or list): Reward taken by the agent from the Environment.
+        
+        """
 
         if isinstance(reward, list):
             if len(reward) == 0:

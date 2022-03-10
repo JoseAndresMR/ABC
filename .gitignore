@@ -140,8 +140,13 @@ runs/
 
 # Pytest
 events*
-log/
 
 # Files
 *.pdf
 entry_point.py
+
+# Plots
+log/
+
+# Renders
+renders/

@@ -8,7 +8,7 @@ from .environment import Environment
 class UnityEpisodicEnvironment(Environment):
     """ OpenAI Unity, episodic environment. """
 
-    def __init__(self, file_path, id, log_path):
+    def __init__(self, file_path: str, id: str, log_path: str):
         super().__init__(id, log_path)
         """ Creates the Unity environment. Gathers Unity specific information structure and presents it as a common ABC frame.
 

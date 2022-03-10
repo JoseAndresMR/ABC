@@ -1,6 +1,5 @@
 from .unity_episodic_environment import UnityEpisodicEnvironment
 from .gym_episodic_environment import GymEpisodicEnvironment
-from copy import deepcopy
 import json
 import os
 
@@ -11,7 +10,7 @@ class MetaEnvironment(object):
     It serves as a common interface with brain.
     """
 
-    def __init__(self, config, log_path):
+    def __init__(self, config: dict, log_path: str):
         """MetaEnvironment gathers and manages all the environments currently active in the current experience.
         It serves as a common interface with brain.
 
@@ -28,28 +27,34 @@ class MetaEnvironment(object):
         self.environments = {}
         self.active_envs = 0
         self.total_episodes_finished = 0
+        # Instancing the environments
         self.add_environments()
+
+    @staticmethod
+    def get_empty_env():
+        """Return the dictionary of an empty env, allowing to remove deepcopy"""
+        return {"env": None, "state": None, "action": list(), "reward": list(),
+                "done": False, "finished": False, "info": dict(), "active": False}
 
     def add_environments(self):
         """
         Create and start all the environments required in this experience given the configuration.
-        TODO: Dynamically create and close the envs when more complex schedulres are required.
+        TODO: Dynamically create and close the envs when more complex schedulers are required.
         """
-        empty_env = {"env" : None, "state" : None, "action" : [], "reward" : [],
-                     "done" : False, "finished" : False, "info" : {}, "active" : False}
-
         envs = self.config["environments"]
         for env in envs:
-            self.environments[env["id"]] = deepcopy(
-                empty_env)  # Test if deepcopy can be deleted
+            self.environments[env["id"]] = self.get_empty_env()
             if env["origin"] == "unity":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = UnityEpisodicEnvironment(
-                        env["file_path"], env["id"], self.log_path)
+                        file_path=env["file_path"],
+                        id=env["id"],
+                        log_path=self.log_path
+                    )
             if env["origin"] == "gym":
                 if env["temporality"] == "episodic":
                     self.environments[env["id"]]["env"] = GymEpisodicEnvironment(
-                        env["id"], env["name"], self.log_path, env["use_kb_render"])
+                        env["id"], env["name"], self.log_path, env["use_kb_render"], env['render_mp4'])
             self.environments[env["id"]]["info"] = self.environments[env["id"]
                                                                      ]["env"].get_environment_info()
 
